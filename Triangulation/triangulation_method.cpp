@@ -95,7 +95,7 @@ namespace GEO1016_A2 {
         NormalizeTransform() { T0_flag = T1_flag = false; }
     };  // struct NormalizeTransform is ONLY FOR the getTransformMatrices() function
 
-    NormalizeTransform getTransformMatrices(
+    NormalizeTransform getNormalizeTransformMatrices(
         const std::vector<Vector2D>& points_0,
         const std::vector<Vector2D>& points_1)
     {
@@ -308,7 +308,7 @@ bool Triangulation::triangulation(
     //      - estimate the fundamental matrix F;
     //      - compute the essential matrix E;
     //      - recover rotation R and t.
-    auto trans = GEO1016_A2::getTransformMatrices(points_0, points_1);
+    auto trans = GEO1016_A2::getNormalizeTransformMatrices(points_0, points_1);
     GEO1016_debugger::PrintMatrix33(trans.T0);
     GEO1016_debugger::PrintMatrix33(trans.T1);
     // TODO: Reconstruct 3D points. The main task is
