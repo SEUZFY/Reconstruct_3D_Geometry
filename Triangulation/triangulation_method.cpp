@@ -30,6 +30,50 @@
 using namespace easy3d;
 
 
+namespace GEO1016_A2 {
+    /*
+    * if the input is valid
+    * CONSTRAINTS
+    * (1) correspondences >= 8
+    * (2) points_0.size() == points_1.size()
+    */
+    bool is_input_valid(const std::vector<Vector2D>& points_0, const std::vector<Vector2D>& points_1)
+    {
+        if (points_0.size() < 8 || points_1.size() < 8)  // at least 8 correspondences
+        {
+            LOG(ERROR) << "insufficient correspondences\n";
+            return false;
+        }
+
+        if (points_0.size() != points_1.size())  // size doesn't match
+        {
+            LOG(ERROR) << "point size MUST match\n";
+            return false;
+        }
+
+        return true;
+    }
+
+
+    /*
+    * construct transform matrix for normalization
+    * explanation:
+    * let (tx, ty) denote the center of the image
+    * let pk(k = 1,2,...N) denote the centered pixel point(NOT original pixel point)
+    * let dc denote the distance of each new calculated point to the origin(0, 0)
+    * where dc = sqrt(SUM pk^2)
+    * dc divided by the number of tracked points(N), results in the average distance to the origin:
+    * avg = dc/N
+    * in order to make the average distance of a point p from the origin is equal to ¡Ì2:
+    * avg * s = ¡Ì2, thus s = ¡Ì2/avg, s is the scaling factor
+    * 
+    * Then the transform matrix for one image is:
+    *     s    0   -stx
+    * T = 0    s   -sty     -> T is a 3 by 3 matrix
+    *     0    0     1
+    */
+}
+
 /**
  * TODO: Finish this function for reconstructing 3D geometry from corresponding image points.
  * @return True on success, otherwise false. On success, the reconstructed 3D points must be written to 'points_3d'
@@ -133,6 +177,8 @@ bool Triangulation::triangulation(
     // implementation starts ...
 
     // TODO: check if the input is valid (always good because you never known how others will call your function).
+    auto valid = GEO1016_A2::is_input_valid(points_0, points_1);
+    if (!valid)return false;
 
     // TODO: Estimate relative pose of two views. This can be subdivided into
     //      - estimate the fundamental matrix F;
