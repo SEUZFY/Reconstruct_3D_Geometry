@@ -37,7 +37,7 @@ namespace GEO1016_A2 {
     * (1) correspondences >= 8
     * (2) points_0.size() == points_1.size()
     */
-    bool is_input_valid(const std::vector<Vector2D>& points_0, const std::vector<Vector2D>& points_1)
+    bool isInputValid(const std::vector<Vector2D>& points_0, const std::vector<Vector2D>& points_1)
     {
         if (points_0.size() < 8 || points_1.size() < 8)  // at least 8 correspondences
         {
@@ -71,7 +71,28 @@ namespace GEO1016_A2 {
     *     s    0   -stx
     * T = 0    s   -sty     -> T is a 3 by 3 matrix
     *     0    0     1
+    *
+    * @return:
+    * std::pair containing TWO transform matrices fro TWO images
+    * .first  is the transform matrix for points_0
+    * .second is the transform matrix for points_1
     */
+    std::pair<Matrix33, Matrix33> getTransformMatrices(
+        const std::vector<Vector2D>& points_0,
+        const std::vector<Vector2D>& points_1)
+    {
+        // transform matrix for points_0 --------------------------------------------------
+        double sumx_0 = 0;  // for calculating image_0's center
+        double sumy_0 = 0;
+        for (const auto& p : points_0)
+        {
+            sumx_0 += p.x();
+            sumy_0 += p.y();
+        }
+        if (sumx_0 == 0)LOG(ERROR) << "please check the divisor for x coordinates\n";
+
+        //return std::make_pair(T_0, T_1);
+    }
 }
 
 /**
@@ -177,7 +198,7 @@ bool Triangulation::triangulation(
     // implementation starts ...
 
     // TODO: check if the input is valid (always good because you never known how others will call your function).
-    auto valid = GEO1016_A2::is_input_valid(points_0, points_1);
+    auto valid = GEO1016_A2::isInputValid(points_0, points_1);
     if (!valid)return false;
 
     // TODO: Estimate relative pose of two views. This can be subdivided into
