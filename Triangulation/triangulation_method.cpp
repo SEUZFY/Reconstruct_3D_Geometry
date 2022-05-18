@@ -29,6 +29,14 @@
 
 using namespace easy3d;
 
+namespace GEO1016_debugger {
+    void PrintMatrix33(const Matrix33& M)
+    {
+        std::cout << M(0, 0) << "," << M(0, 1) << "," << M(0, 2) << '\n';
+        std::cout << M(1, 0) << "," << M(1, 1) << "," << M(1, 2) << '\n';
+        std::cout << M(2, 0) << "," << M(2, 1) << "," << M(2, 2) << '\n';
+    }
+}
 
 namespace GEO1016_A2 {
     /*
@@ -58,9 +66,9 @@ namespace GEO1016_A2 {
     /*
     * construct transform matrix for normalization
     * explanation:
-    * let (tx, ty) denote the center of the image
-    * let pk(k = 1,2,...N) denote the centered pixel point(NOT original pixel point)
-    * let dc denote the distance of each new calculated point to the origin(0, 0)
+    * (tx, ty): denote the center of the image
+    * pk(k = 1,2,...N): denote the centered pixel point(NOT original pixel point)
+    * dc: denote the distance of each new calculated point to the origin(0, 0)
     * where dc = sqrt(SUM pk^2)
     * dc divided by the number of tracked points(N), results in the average distance to the origin:
     * avg = dc/N
@@ -73,25 +81,120 @@ namespace GEO1016_A2 {
     *     0    0     1
     *
     * @return:
-    * std::pair containing TWO transform matrices fro TWO images
-    * .first  is the transform matrix for points_0
-    * .second is the transform matrix for points_1
+    * An object of struct NormalizeTransform(actually return its copy)
+    * 
+    * NB: In the process of returning, a copy will be generated, 
+    * but the cost of two 3*3 matrices copies is not very high. 
+    * Considering the code simplification in the main function, returning copy is considered acceptable here.
     */
-    std::pair<Matrix33, Matrix33> getTransformMatrices(
+    struct NormalizeTransform {
+        Matrix33 T0;  // transform matrix for points_0
+        Matrix33 T1;  // transform matrix for points_1
+        bool T0_flag; // indicates whether T0 is successfully constructed
+        bool T1_flag; // indicates whether T1 is successfully constructed
+        NormalizeTransform() { T0_flag = T1_flag = false; }
+    };  // struct NormalizeTransform is ONLY FOR the getTransformMatrices() function
+
+    NormalizeTransform getTransformMatrices(
         const std::vector<Vector2D>& points_0,
         const std::vector<Vector2D>& points_1)
     {
-        // transform matrix for points_0 --------------------------------------------------
-        double sumx_0 = 0;  // for calculating image_0's center
-        double sumy_0 = 0;
+        // object will be returned
+        NormalizeTransform trans;
+        
+        // transform matrix for points_0 --------------------------------------------------------------
+        double sumX = 0;  // for calculating image's center
+        double sumY = 0;
+        const double N = static_cast<double>(points_0.size());  // here N is guaranteed to be larger than 0(ifInputValid() gets executed first)
+
         for (const auto& p : points_0)
         {
-            sumx_0 += p.x();
-            sumy_0 += p.y();
+            sumX += p.x();
+            sumY += p.y();
         }
-        if (sumx_0 == 0)LOG(ERROR) << "please check the divisor for x coordinates\n";
+        if (sumX < 1e-8)  // sumX is considered equal to 0
+        {
+            LOG(ERROR) << "please check the divisor for x coordinates\n";
+            return trans;  // T0_flag and T1_flag remain false, will not trigger further process
+        }
+        if (sumY < 1e-8)  // sumY is considered equal to 0
+        {
+            LOG(ERROR) << "please check the divisor for y coordinates\n";
+            return trans;  // T0_flag and T1_flag remain false, will not trigger further process
+        }
 
-        //return std::make_pair(T_0, T_1);
+        // image center: (tx, ty) -- image_0
+        double tx = sumX / N;
+        double ty = sumY / N;
+        
+        // scale factor -- image_0
+        double dc_squared = 0;
+        for (const auto& p : points_0)
+            dc_squared += (p.x() - tx) * (p.x() - tx) + (p.y() - ty) * (p.y() - ty);
+        double dc = sqrt(dc_squared);  // dist from the origin(here origin should be the image center)
+        double avg_dc = dc / N;
+        if (avg_dc < 1e-8)
+        {
+            LOG(ERROR) << "please check the average distance to the origin\n";
+            return trans;   // T0_flag and T1_flag remain false, will not trigger further process
+        }
+        double s = sqrt(2) / avg_dc;  // scale factor of image_0
+
+        // construct the transform matrix for image_0, set the T0_flag to true
+        trans.T0.set_row(0, { s, 0, -s * tx });
+        trans.T0.set_row(1, { 0, s, -s * ty });
+        trans.T0.set_row(2, { 0, 0, 1 });
+        trans.T0_flag = true;  // T0 is successfully constructed
+        // transform matrix for points_0 --------------------------------------------------------------
+
+
+        // variables resetting -----------------------------------------------
+        sumX = sumY = 0;
+        dc_squared = 0;
+        // variables resetting -----------------------------------------------
+
+
+        // transform matrix for points_1 --------------------------------------------------------------
+        for (const auto& p : points_1)
+        {
+            sumX += p.x();
+            sumY += p.y();
+        }
+        if (sumX < 1e-8)  // sumX is considered equal to 0
+        {
+            LOG(ERROR) << "please check the divisor for x coordinates\n";
+            return trans;  // T1_flag remains false, will not trigger further process
+        }
+        if (sumY < 1e-8)  // sumY is considered equal to 0
+        {
+            LOG(ERROR) << "please check the divisor for y coordinates\n";
+            return trans;  // T1_flag remains false, will not trigger further process
+        }
+
+        // image center: (tx, ty) -- image_1
+        tx = sumX / N;
+        ty = sumY / N;
+
+        // scale factor -- image_1
+        for (const auto& p : points_1)
+            dc_squared += (p.x() - tx) * (p.x() - tx) + (p.y() - ty) * (p.y() - ty);
+        dc = sqrt(dc_squared);  // dist from the origin(here origin should be the image center)
+        avg_dc = dc / N;
+        if (avg_dc < 1e-8)
+        {
+            LOG(ERROR) << "please check the average distance to the origin\n";
+            return trans;   // T1_flag remains false, will not trigger further process
+        }
+        s = sqrt(2) / avg_dc;  // scale factor of image_1
+
+        // construct the transform matrix for image_1, set the T1_flag to true
+        trans.T1.set_row(0, { s, 0, -s * tx });
+        trans.T1.set_row(1, { 0, s, -s * ty });
+        trans.T1.set_row(2, { 0, 0, 1 });
+        trans.T1_flag = true;  // T1 is successfully constructed
+        // transform matrix for points_1 --------------------------------------------------------------
+
+        return trans;
     }
 }
 
@@ -205,7 +308,9 @@ bool Triangulation::triangulation(
     //      - estimate the fundamental matrix F;
     //      - compute the essential matrix E;
     //      - recover rotation R and t.
-
+    auto trans = GEO1016_A2::getTransformMatrices(points_0, points_1);
+    GEO1016_debugger::PrintMatrix33(trans.T0);
+    GEO1016_debugger::PrintMatrix33(trans.T1);
     // TODO: Reconstruct 3D points. The main task is
     //      - triangulate a pair of image points (i.e., compute the 3D coordinates for each corresponding point pair)
 
