@@ -187,6 +187,34 @@ namespace GEO1016_A2 {
 
         return std::make_pair(np, np_valid);
     }
+
+
+    /*
+    * Wf = 0
+    * construct W and solve it using SVD
+    * rank-2 approximation
+    * denormalization
+    * Fundamental matrix
+    */
+    Matrix33 getFundamentalMatrix(
+        const std::vector<Vector2D>& points_0,
+        const std::vector<Vector2D>& points_1)
+    {
+        // Fundamental Matrix (will be returned)
+        Matrix33 F;
+        
+        // initialize W matrix: Wf = 0
+        int Nrows = static_cast<int>(points_0.size());  // points_0.size() = points_1.size()
+        int Ncols = 9;  // according to notes
+        Matrix W(Nrows, Ncols);
+
+        // Form W matrix
+        for (std::size_t i = 0; i != points_0.size(); ++i)
+        {
+
+        }
+        return F;
+    }
 }
 
 /**
