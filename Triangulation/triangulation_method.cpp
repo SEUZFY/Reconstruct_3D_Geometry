@@ -36,6 +36,17 @@ namespace GEO1016_debugger {
         std::cout << M(1, 0) << "," << M(1, 1) << "," << M(1, 2) << '\n';
         std::cout << M(2, 0) << "," << M(2, 1) << "," << M(2, 2) << '\n';
     }
+
+    void PrintPoints(const std::vector<Vector2D>& points)
+    {
+        int count = 0;  // display the first 10 points
+        for (const auto& p : points)
+        {
+            std::cout << p.x() << "," << p.y() << '\n';
+            ++count;
+            if (count > 10)break;
+        }
+    }
 }
 
 namespace GEO1016_A2 {
@@ -93,8 +104,7 @@ namespace GEO1016_A2 {
         bool T0_flag; // indicates whether T0 is successfully constructed
         bool T1_flag; // indicates whether T1 is successfully constructed
         NormalizeTransform() { T0_flag = T1_flag = false; }
-    };  // struct NormalizeTransform is ONLY FOR the getTransformMatrices() function
-
+    };  // struct NormalizeTransform is ONLY FOR the Normalization process
     NormalizeTransform getNormalizeTransformMatrices(
         const std::vector<Vector2D>& points_0,
         const std::vector<Vector2D>& points_1)
@@ -195,6 +205,65 @@ namespace GEO1016_A2 {
         // transform matrix for points_1 --------------------------------------------------------------
 
         return trans;
+    }
+
+
+    /*
+    * NormalizePoints
+    * apply transform matrix to points_0 and points_1 respectively
+    * 
+    * @return:
+    * return an object of struct NormalPoints
+    * containing the normalized point vectors and status
+    * 
+    * struct NormalPoints is designed for helping 
+    * return, verify the results of NormalizePoints() function and for passing parameters.
+    */
+    struct NormalPoints {
+        std::vector<Vector2D> NormalPts_0;  // normalized points for points_0
+        std::vector<Vector2D> NormalPts_1;  // normalized points for points_1
+        bool N0_flag;  // indicates whether NormalPts_0 is successfully constructed
+        bool N1_flag;  // indicates whether NormalPts_1 is successfully constructed
+        NormalPoints() { N0_flag = N1_flag = false; }
+        NormalPoints(const std::vector<Vector2D>& points_0, const std::vector<Vector2D>& points_1)
+        {
+            NormalPts_0.reserve(points_0.size());
+            NormalPts_1.reserve(points_1.size());
+            N0_flag = N1_flag = false;
+        }  // recommend to use this constructor to speed up the vectors
+    };
+    NormalPoints NormalizePoints(const std::vector<Vector2D>& points_0, const std::vector<Vector2D>& points_1)
+    {
+        // object will be returned
+        NormalPoints np(points_0, points_1);
+
+        // get the transform matrices
+        auto trans = getNormalizeTransformMatrices(points_0, points_1);
+        if (trans.T0_flag == false || trans.T1_flag == false)
+        {
+            LOG(ERROR) << "Normalize - transform matrices construction failed, please check\n";
+            return np;  // N0_flag and N1_flag remain false and further process will not be triggered
+        }
+
+        // T0_flag and T1_flag are both true - transform matrices successfully constructed
+        
+        // normalize points_0
+        for (const auto& p : points_0)
+        {
+            Vector3D v = trans.T0 * p.homogeneous();  // normalize points: q = T*p
+            np.NormalPts_0.push_back(v.cartesian());  // add the normalized 2d coordinates to the result vector
+        }
+        np.N0_flag = true;  // result vector np.NormalPts_0 is successfully constructed
+
+        // alter points_1
+        for (const auto& p : points_1)
+        {
+            Vector3D v = trans.T1 * p.homogeneous();  // normalize points: q' = T*p'
+            np.NormalPts_1.push_back(v.cartesian());  // add the normalized 2d coordinates to the result vector
+        }
+        np.N1_flag = true;  // result vector np.NormalPts_1 is successfully constructed
+
+        return np;  // np itself will be destructed after this function gets executed, actually we return a copy of np here
     }
 }
 
@@ -308,9 +377,15 @@ bool Triangulation::triangulation(
     //      - estimate the fundamental matrix F;
     //      - compute the essential matrix E;
     //      - recover rotation R and t.
+
     auto trans = GEO1016_A2::getNormalizeTransformMatrices(points_0, points_1);
+    std::cout << "normalize transform matrix: \n";
     GEO1016_debugger::PrintMatrix33(trans.T0);
-    GEO1016_debugger::PrintMatrix33(trans.T1);
+    GEO1016_debugger::PrintPoints(points_0);  // before normalize
+    auto np = GEO1016_A2::NormalizePoints(points_0, points_1);
+    std::cout << "after normalize: \n";
+    GEO1016_debugger::PrintPoints(np.NormalPts_0);  // after normalize
+    
     // TODO: Reconstruct 3D points. The main task is
     //      - triangulate a pair of image points (i.e., compute the 3D coordinates for each corresponding point pair)
 
