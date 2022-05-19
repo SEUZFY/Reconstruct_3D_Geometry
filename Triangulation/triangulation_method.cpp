@@ -92,178 +92,100 @@ namespace GEO1016_A2 {
     *     0    0     1
     *
     * @return:
-    * An object of struct NormalizeTransform(actually return its copy)
-    * 
-    * NB: In the process of returning, a copy will be generated, 
-    * but the cost of two 3*3 matrices copies is not very high. 
-    * Considering the code simplification in the main function, returning copy is considered acceptable here.
-    */
-    struct NormalizeTransform {
-        Matrix33 T0;  // transform matrix for points_0
-        Matrix33 T1;  // transform matrix for points_1
-        bool T0_flag; // indicates whether T0 is successfully constructed
-        bool T1_flag; // indicates whether T1 is successfully constructed
-        NormalizeTransform() { T0_flag = T1_flag = false; }
-    };  // struct NormalizeTransform is ONLY FOR the Normalization process
-    NormalizeTransform getNormalizeTransformMatrices(
-        const std::vector<Vector2D>& points_0,
-        const std::vector<Vector2D>& points_1)
+    * std::pair<Matrix33, bool>
+    * first element is the constructed transform matrix
+    * second element is a bool variable indicating whether the matrix is susseccfully constructed
+    */  
+    std::pair<Matrix33, bool> getNormalizeTransformMatrix(
+        const std::vector<Vector2D>& points)
     {
-        // object will be returned
-        NormalizeTransform trans;
+        // elements will be returned
+        Matrix33 T;
+        bool T_valid = false;
         
-        // transform matrix for points_0 --------------------------------------------------------------
+        // transform matrix --------------------------------------------------------------
         double sumX = 0;  // for calculating image's center
         double sumY = 0;
-        const double N = static_cast<double>(points_0.size());  // here N is guaranteed to be larger than 0(ifInputValid() gets executed first)
+        const double N = static_cast<double>(points.size());  // here N is guaranteed to be larger than 0(ifInputValid() gets executed first)
 
-        for (const auto& p : points_0)
+        for (const auto& p : points)
         {
             sumX += p.x();
             sumY += p.y();
         }
-        if (sumX < 1e-8)  // sumX is considered equal to 0
+        if (sumX < 1e-8 || sumY < 1e-8)  // sumX or sumY is considered equal to 0
         {
-            LOG(ERROR) << "please check the divisor for x coordinates\n";
-            return trans;  // T0_flag and T1_flag remain false, will not trigger further process
+            LOG(ERROR) << "please check the divisor for x and y coordinates\n";
+            return std::make_pair(T, T_valid);  // T_valid remains false, will not trigger further process
         }
-        if (sumY < 1e-8)  // sumY is considered equal to 0
-        {
-            LOG(ERROR) << "please check the divisor for y coordinates\n";
-            return trans;  // T0_flag and T1_flag remain false, will not trigger further process
-        }
-
-        // image center: (tx, ty) -- image_0
+        
+        // image center: (tx, ty)
         double tx = sumX / N;
         double ty = sumY / N; 
         
-        // scale factor -- image_0
+        // scale factor
         double dc_squared = 0;
-        for (const auto& p : points_0)
+        for (const auto& p : points)
             dc_squared += (p.x() - tx) * (p.x() - tx) + (p.y() - ty) * (p.y() - ty);
         double dc = sqrt(dc_squared);  // dist from the origin(here origin should be the image center)
         double avg_dc = dc / N;
         if (avg_dc < 1e-8)
         {
             LOG(ERROR) << "please check the average distance to the origin\n";
-            return trans;   // T0_flag and T1_flag remain false, will not trigger further process
+            return std::make_pair(T, T_valid);  // T_valid remains false, will not trigger further process
         }
-        double s = sqrt(2) / avg_dc;  // scale factor of image_0
+        double s = sqrt(2) / avg_dc;  // scale factor
 
         // construct the transform matrix for image_0, set the T0_flag to true
-        trans.T0.set_row(0, { s, 0, -s * tx });
-        trans.T0.set_row(1, { 0, s, -s * ty });
-        trans.T0.set_row(2, { 0, 0, 1 });
-        trans.T0_flag = true;  // T0 is successfully constructed
-        // transform matrix for points_0 --------------------------------------------------------------
+        T.set_row(0, { s, 0, -s * tx });
+        T.set_row(1, { 0, s, -s * ty });
+        T.set_row(2, { 0, 0, 1 });
+        T_valid = true;  // T is successfully constructed
+        // transform matrix --------------------------------------------------------------
 
-
-        // variables resetting -----------------------------------------------
-        sumX = sumY = 0;
-        dc_squared = 0;
-        // variables resetting -----------------------------------------------
-
-
-        // transform matrix for points_1 --------------------------------------------------------------
-        for (const auto& p : points_1)
-        {
-            sumX += p.x();
-            sumY += p.y();
-        }
-        if (sumX < 1e-8)  // sumX is considered equal to 0
-        {
-            LOG(ERROR) << "please check the divisor for x coordinates\n";
-            return trans;  // T1_flag remains false, will not trigger further process
-        }
-        if (sumY < 1e-8)  // sumY is considered equal to 0
-        {
-            LOG(ERROR) << "please check the divisor for y coordinates\n";
-            return trans;  // T1_flag remains false, will not trigger further process
-        }
-
-        // image center: (tx, ty) -- image_1
-        tx = sumX / N;
-        ty = sumY / N;
-
-        // scale factor -- image_1
-        for (const auto& p : points_1)
-            dc_squared += (p.x() - tx) * (p.x() - tx) + (p.y() - ty) * (p.y() - ty);
-        dc = sqrt(dc_squared);  // dist from the origin(here origin should be the image center)
-        avg_dc = dc / N;
-        if (avg_dc < 1e-8)
-        {
-            LOG(ERROR) << "please check the average distance to the origin\n";
-            return trans;   // T1_flag remains false, will not trigger further process
-        }
-        s = sqrt(2) / avg_dc;  // scale factor of image_1
-
-        // construct the transform matrix for image_1, set the T1_flag to true
-        trans.T1.set_row(0, { s, 0, -s * tx });
-        trans.T1.set_row(1, { 0, s, -s * ty });
-        trans.T1.set_row(2, { 0, 0, 1 });
-        trans.T1_flag = true;  // T1 is successfully constructed
-        // transform matrix for points_1 --------------------------------------------------------------
-
-        return trans;
+        return std::make_pair(T, T_valid);
     }
 
 
     /*
     * NormalizePoints
-    * apply transform matrix to points_0 and points_1 respectively
+    * apply transform matrix to 2D points
     * 
     * @return:
-    * return an object of struct NormalPoints
-    * containing the normalized point vectors and status
-    * 
-    * struct NormalPoints is designed for helping 
-    * return, verify the results of NormalizePoints() function and for passing parameters.
+    * std::pair<std::vector<Vector2D>, bool>
+    * first element is the normalized points set
+    * second element is a bool variable indicating whether the normalized points set is valid.
     */
-    struct NormalPoints {
-        std::vector<Vector2D> NormalPts_0;  // normalized points for points_0
-        std::vector<Vector2D> NormalPts_1;  // normalized points for points_1
-        bool N0_flag;  // indicates whether NormalPts_0 is successfully constructed
-        bool N1_flag;  // indicates whether NormalPts_1 is successfully constructed
-        NormalPoints() { N0_flag = N1_flag = false; }
-        NormalPoints(const std::vector<Vector2D>& points_0, const std::vector<Vector2D>& points_1)
-        {
-            NormalPts_0.reserve(points_0.size());
-            NormalPts_1.reserve(points_1.size());
-            N0_flag = N1_flag = false;
-        }  // recommend to use this constructor to speed up the vectors
-    };
-    NormalPoints NormalizePoints(const std::vector<Vector2D>& points_0, const std::vector<Vector2D>& points_1)
+    std::pair<std::vector<Vector2D>, bool> NormalizePoints(const std::vector<Vector2D>& points)
     {
-        // object will be returned
-        NormalPoints np(points_0, points_1);
+        // elements will be returned
+        std::vector<Vector2D> np;
+        np.reserve(points.size());
+        bool np_valid = false;
 
-        // get the transform matrices
-        auto trans = getNormalizeTransformMatrices(points_0, points_1);
-        if (trans.T0_flag == false || trans.T1_flag == false)
+        // get the transform matrix and its status
+        const auto& trans = getNormalizeTransformMatrix(points);
+        const auto& T = trans.first;
+        const auto& T_valid = trans.second;
+
+        if (T_valid == false)
         {
-            LOG(ERROR) << "Normalize - transform matrices construction failed, please check\n";
-            return np;  // N0_flag and N1_flag remain false and further process will not be triggered
+            LOG(ERROR) << "Normalize - transform matrix construction failed, please check\n"
+                << "getNormalizeTransformMatrix() function in triangulation_method.cpp\n";
+            return std::make_pair(np, np_valid);  // np_valid remains false and further process will not be triggered
         }
 
-        // T0_flag and T1_flag are both true - transform matrices successfully constructed
+        // T_valid is true - transform matrix successfully constructed
         
-        // normalize points_0
-        for (const auto& p : points_0)
+        // normalize points
+        for (const auto& p : points)
         {
-            Vector3D v = trans.T0 * p.homogeneous();  // normalize points: q = T*p
-            np.NormalPts_0.push_back(v.cartesian());  // add the normalized 2d coordinates to the result vector
+            Vector3D q = T * p.homogeneous();  // normalize points: q = T*p
+            np.push_back(q.cartesian());  // add the normalized 2d coordinates to the result vector
         }
-        np.N0_flag = true;  // result vector np.NormalPts_0 is successfully constructed
+        np_valid = true;  // result vector np is successfully constructed
 
-        // alter points_1
-        for (const auto& p : points_1)
-        {
-            Vector3D v = trans.T1 * p.homogeneous();  // normalize points: q' = T*p'
-            np.NormalPts_1.push_back(v.cartesian());  // add the normalized 2d coordinates to the result vector
-        }
-        np.N1_flag = true;  // result vector np.NormalPts_1 is successfully constructed
-
-        return np;  // np itself will be destructed after this function gets executed, actually we return a copy of np here
+        return std::make_pair(np, np_valid);
     }
 }
 
@@ -378,13 +300,18 @@ bool Triangulation::triangulation(
     //      - compute the essential matrix E;
     //      - recover rotation R and t.
 
-    auto trans = GEO1016_A2::getNormalizeTransformMatrices(points_0, points_1);
-    std::cout << "normalize transform matrix: \n";
-    GEO1016_debugger::PrintMatrix33(trans.T0);
-    GEO1016_debugger::PrintPoints(points_0);  // before normalize
-    auto np = GEO1016_A2::NormalizePoints(points_0, points_1);
+    auto trans = GEO1016_A2::getNormalizeTransformMatrix(points_0);
+    std::cout << "normalize transform matrix for points_0: \n";
+    GEO1016_debugger::PrintMatrix33(trans.first);
+
+    trans = GEO1016_A2::getNormalizeTransformMatrix(points_1);
+    std::cout << "normalize transform matrix for points_1: \n";
+    GEO1016_debugger::PrintMatrix33(trans.first);
+
+    GEO1016_debugger::PrintPoints(points_1);  // before normalize
+    auto np = GEO1016_A2::NormalizePoints(points_1);
     std::cout << "after normalize: \n";
-    GEO1016_debugger::PrintPoints(np.NormalPts_0);  // after normalize
+    GEO1016_debugger::PrintPoints(np.first);  // after normalize
     
     // TODO: Reconstruct 3D points. The main task is
     //      - triangulate a pair of image points (i.e., compute the 3D coordinates for each corresponding point pair)
