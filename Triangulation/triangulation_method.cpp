@@ -125,7 +125,7 @@ namespace GEO1016_A2 {
 
         // image center: (tx, ty) -- image_0
         double tx = sumX / N;
-        double ty = sumY / N;
+        double ty = sumY / N; 
         
         // scale factor -- image_0
         double dc_squared = 0;
