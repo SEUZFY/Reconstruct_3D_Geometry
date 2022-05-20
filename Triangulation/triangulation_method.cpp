@@ -274,12 +274,12 @@ namespace GEO1016_A2 {
         Matrix S(m, n, 0.0);   // initialized with 0s
         Matrix V(n, n, 0.0);   // initialized with 0s
         svd_decompose(initial_F, U, S, V);
-        
+
         // rank-2 approximation - make S(2, 2) = 0
-        S(2, 2) = 0;
+        S(2, 2) = 0; 
         
         // update F
-        F = U * S * V;
+        F = U * S * V.transpose();
         
         // denormalize F: F = T'_transpose() * F * T scale F such that F(2, 2) = 1.0
         F = T_.transpose() * F * T;
@@ -463,7 +463,7 @@ bool Triangulation::triangulation(
 
 
     // debug
-    //GEO1016_debugger::PrintMatrix33(initial_F);
+    GEO1016_debugger::PrintMatrix33(F);
 
     // TODO: Reconstruct 3D points. The main task is
     //      - triangulate a pair of image points (i.e., compute the 3D coordinates for each corresponding point pair)
