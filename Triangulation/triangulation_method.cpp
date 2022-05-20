@@ -463,6 +463,7 @@ bool Triangulation::triangulation(
 
 
     // debug
+    //GEO1016_debugger::PrintMatrix33(initial_F);
 
     // TODO: Reconstruct 3D points. The main task is
     //      - triangulate a pair of image points (i.e., compute the 3D coordinates for each corresponding point pair)
