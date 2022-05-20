@@ -61,6 +61,7 @@ namespace GEO1016_debugger {
             std::cout << '\n';
         }
     }
+
 }
 
 namespace GEO1016_A2 {
@@ -138,11 +139,10 @@ namespace GEO1016_A2 {
         double ty = sumY / N;
 
         // scale factor
-        double dc_squared = 0;
+        double sum_dist = 0;
         for (const auto& p : points)
-            dc_squared += (p.x() - tx) * (p.x() - tx) + (p.y() - ty) * (p.y() - ty);
-        double dc = sqrt(dc_squared);  // dist from the origin(here origin should be the image center)
-        double avg_dc = dc / N;
+            sum_dist += sqrt((p.x() - tx) * (p.x() - tx) + (p.y() - ty) * (p.y() - ty));
+        double avg_dc = sum_dist / N;
         if (avg_dc < 1e-8)
         {
             LOG(ERROR) << "please check the average distance to the origin\n";
@@ -461,6 +461,8 @@ bool Triangulation::triangulation(
     Matrix33 F = FF.first;
     // get Fundamental matrix ------------------------------------------------------------------------
 
+
+    // debug
 
     // TODO: Reconstruct 3D points. The main task is
     //      - triangulate a pair of image points (i.e., compute the 3D coordinates for each corresponding point pair)
