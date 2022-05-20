@@ -192,21 +192,21 @@ namespace GEO1016_A2 {
 
 
     /*
-    * getFundaFromSVD
+    * get initial Fundamental (matrix)
     * Wf = 0
     * construct W and solve it using SVD
     * use the last column of V to form Fundamental matrix(F needs to be further processed)
     * @return:
     * std::pair<Matrix33, bool>, first is the F matrix, second is its validation status
     */
-    std::pair<Matrix33, bool> getFundaFromSVD(
+    std::pair<Matrix33, bool> getInitialFundamental(
         const std::vector<Vector2D>& normal_points_0,
         const std::vector<Vector2D>& normal_points_1)
     {
-        // elements will be returned: Fundamental Matrix, its status
+        // elements will be returned: initial Fundamental Matrix, its status
         Matrix33 F;
         bool F_valid = false;
-        // elements will be returned: Fundamental Matrix, its status
+        // elements will be returned: initial Fundamental Matrix, its status
 
 
         // initialize W matrix: Wf = 0, W: m by n matrix
@@ -245,15 +245,21 @@ namespace GEO1016_A2 {
 
 
     /*
-    * get Fundamental Matrix
+    * get Fundamental (Matrix)
     * process:
     * (1)decompose F using SVD
     * (2)rank-2 approximation - make S(2, 2) = 0
     * (3)denormalization - scale F such that F(2, 2) = 1.0
+    * 
+    * @param:
+    * F_fromSVD: Fundamental matrix from Wf=0, solve W using SVD
     * @return:
     * std::pair<Matrix33, bool>, first is the processed F matrix, second is its validation status
     */
+    std::pair<Matrix33, bool> getFundamental(const Matrix33& F_fromSVD)
+    {
 
+    }
 
 }
 
@@ -389,7 +395,7 @@ bool Triangulation::triangulation(
 
 
     // get fundamental matrix from Wf = 0, use SVD to solve W ----------------------------------------
-    auto Funda = GEO1016_A2::getFundaFromSVD(normal_points_0, normal_points_1);
+    auto Funda = GEO1016_A2::getInitialFundamental(normal_points_0, normal_points_1);
     if (Funda.second == false)
     {
         LOG(ERROR) << "construct Fundamental Matrix from Wf=0 (solved using SVD) fail, please check\n"
