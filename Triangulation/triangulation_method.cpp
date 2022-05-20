@@ -204,13 +204,14 @@ namespace GEO1016_A2 {
 
 
     /*
+    * getFundaFromSVD
     * Wf = 0
     * construct W and solve it using SVD
-    * rank-2 approximation
-    * denormalization
-    * Fundamental matrix 
+    * use the last column of V to form Fundamental matrix(F needs to be further processed)
+    * @return:
+    * std::pair<Matrix33, bool>, first is the F matrix, second is its validation status
     */
-    std::pair<Matrix33, bool> getFundamentalMatrix(
+    std::pair<Matrix33, bool> getFundaFromSVD(
         const std::vector<Vector2D>& points_0,
         const std::vector<Vector2D>& points_1)
     {
@@ -269,6 +270,19 @@ namespace GEO1016_A2 {
 
         return std::make_pair(F, F_valid);
     }
+
+
+    /*
+    * get Fundamental Matrix
+    * process:
+    * (1)decompose F using SVD
+    * (2)rank-2 approximation - make S(2, 2) = 0
+    * (3)denormalization - scale F such that F(2, 2) = 1.0
+    * @return:
+    * std::pair<Matrix33, bool>, first is the processed F matrix, second is its validation status
+    */
+
+
 }
 
 /**
@@ -382,7 +396,7 @@ bool Triangulation::triangulation(
     //      - compute the essential matrix E;
     //      - recover rotation R and t.
 
-    auto F = GEO1016_A2::getFundamentalMatrix(points_0, points_1);
+    //auto F = GEO1016_A2::getFundamentalMatrix(points_0, points_1);
     
     // TODO: Reconstruct 3D points. The main task is
     //      - triangulate a pair of image points (i.e., compute the 3D coordinates for each corresponding point pair)
