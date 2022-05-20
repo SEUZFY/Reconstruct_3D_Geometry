@@ -165,31 +165,20 @@ namespace GEO1016_A2 {
     * NormalizePoints
     * apply transform matrix to 2D points
     * 
+    * @param:
+    * points need to be normalized, transform matrix M
+    * 
     * @return:
     * std::pair<std::vector<Vector2D>, bool>
     * first element is the normalized points set
     * second element is a bool variable indicating whether the normalized points set is valid.
     */
-    std::pair<std::vector<Vector2D>, bool> NormalizePoints(const std::vector<Vector2D>& points)
+    std::vector<Vector2D> NormalizePoints(
+        const std::vector<Vector2D>& points, const Matrix33& T)
     {
         // elements will be returned
         std::vector<Vector2D> np;
         np.reserve(points.size());
-        bool np_valid = false;
-
-        // get the transform matrix and its status
-        const auto& trans = getNormalizeTransformMatrix(points);
-        const auto& T = trans.first;
-        const auto& T_valid = trans.second;
-
-        if (T_valid == false)
-        {
-            LOG(ERROR) << "Normalize - transform matrix construction failed, please check\n"
-                << "getNormalizeTransformMatrix() function in triangulation_method.cpp\n";
-            return std::make_pair(np, np_valid);  // np_valid remains false and further process will not be triggered
-        }
-
-        // T_valid is true - transform matrix successfully constructed
         
         // normalize points
         for (const auto& p : points)
@@ -197,9 +186,8 @@ namespace GEO1016_A2 {
             Vector3D q = T * p.homogeneous();  // normalize points: q = T*p
             np.push_back(q.cartesian());  // add the normalized 2d coordinates to the result vector
         }
-        np_valid = true;  // result vector np is successfully constructed
 
-        return std::make_pair(np, np_valid);
+        return np;
     }
 
 
@@ -212,42 +200,26 @@ namespace GEO1016_A2 {
     * std::pair<Matrix33, bool>, first is the F matrix, second is its validation status
     */
     std::pair<Matrix33, bool> getFundaFromSVD(
-        const std::vector<Vector2D>& points_0,
-        const std::vector<Vector2D>& points_1)
+        const std::vector<Vector2D>& normal_points_0,
+        const std::vector<Vector2D>& normal_points_1)
     {
         // elements will be returned: Fundamental Matrix, its status
         Matrix33 F;
         bool F_valid = false;
         // elements will be returned: Fundamental Matrix, its status
        
-        // get nornmalized points - fail case
-        const auto& np_0 = NormalizePoints(points_0);
-        const auto& np_1 = NormalizePoints(points_1);
-        if (np_0.second == false || np_1.second == false)
-        {
-            LOG(ERROR) << "normalize points fail, please check\n";
-            return std::make_pair(F, F_valid);  // F_valid remains false, will not trigger further process
-        }
-
-        // get nornmalized points
-        const auto& normalpoints_0 = np_0.first;
-        const auto& normalpoints_1 = np_1.first;
-
-
-        // Now the normalized points are obtained ----------------------------------------------------
-
 
         // initialize W matrix: Wf = 0, W: m by n matrix
-        int m = static_cast<int>(points_0.size());  // number of rows
+        int m = static_cast<int>(normal_points_0.size());  // number of rows
         int n = 9;  // according to notes, number of columns = 9
         Matrix W(m, n);
         
         // define u, v for normalpoints_0, u_, v_ for normalpoints_1
         double u{}, v{}, u_{}, v_{};
-        for (int i = 0; i != normalpoints_0.size(); ++i)
+        for (int i = 0; i != normal_points_0.size(); ++i)
         {
-            u  = normalpoints_0[i].x(); v  = normalpoints_0[i].y();
-            u_ = normalpoints_1[i].x(); v_ = normalpoints_1[i].y();
+            u  = normal_points_0[i].x(); v  = normal_points_0[i].y();
+            u_ = normal_points_1[i].x(); v_ = normal_points_1[i].y();
             W.set_row(i, { u * u_, v * u_, u_, u * v_, v * v_, v_, u, v, 1 });
         }
         
@@ -342,7 +314,7 @@ bool Triangulation::triangulation(
     Matrix33 A;
 
     /// define and initialize a 3 by 3 matrix
-    Matrix33 T(1.1, 2.2, 3.3,
+    Matrix33 T1(1.1, 2.2, 3.3,
                0, 2.2, 3.3,
                0, 0, 1);
 
@@ -396,8 +368,40 @@ bool Triangulation::triangulation(
     //      - compute the essential matrix E;
     //      - recover rotation R and t.
 
-    //auto F = GEO1016_A2::getFundamentalMatrix(points_0, points_1);
+
+    // get transform matrix --------------------------------------------------------------------------
+    auto trans_0 = GEO1016_A2::getNormalizeTransformMatrix(points_0);
+    auto trans_1 = GEO1016_A2::getNormalizeTransformMatrix(points_1);
+    if (trans_0.second == false || trans_1.second == false)
+    {
+        LOG(ERROR) << "construct Normalize Transform Matrix fail, please check\n"
+            << "getNormalizeTransformMatrix() function in triangulation_method.cpp\n";
+        return false;
+    }
+    Matrix33 T = trans_0.first; Matrix33 T_ = trans_1.first;
+    // get transform matrix --------------------------------------------------------------------------
     
+
+    // normalize points ------------------------------------------------------------------------------
+    auto normal_points_0 = GEO1016_A2::NormalizePoints(points_0, T);
+    auto normal_points_1 = GEO1016_A2::NormalizePoints(points_1, T_);
+    // normalize points ------------------------------------------------------------------------------
+    
+
+    // get fundamental matrix from Wf = 0, use SVD to solve W ----------------------------------------
+    auto Funda = GEO1016_A2::getFundaFromSVD(normal_points_0, normal_points_1);
+    if (Funda.second == false)
+    {
+        LOG(ERROR) << "construct Fundamental Matrix from Wf=0 (solved using SVD) fail, please check\n"
+            << "getFundaFromSVD() function in triangulation_method.cpp\n";
+        return false;
+    }
+    Matrix33 F_fromSVD = Funda.first;
+    // get fundamental matrix from Wf = 0, use SVD to solve W ----------------------------------------
+
+    GEO1016_debugger::PrintMatrix33(F_fromSVD);
+
+
     // TODO: Reconstruct 3D points. The main task is
     //      - triangulate a pair of image points (i.e., compute the 3D coordinates for each corresponding point pair)
 
