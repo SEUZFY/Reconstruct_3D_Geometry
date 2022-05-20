@@ -1,0 +1,15 @@
+    
+    auto trans = GEO1016_A2::getNormalizeTransformMatrix(points_0);
+    std::cout << "normalize transform matrix for points_0: \n";
+    GEO1016_debugger::PrintMatrix33(trans.first);
+
+    trans = GEO1016_A2::getNormalizeTransformMatrix(points_1);
+    std::cout << "normalize transform matrix for points_1: \n";
+    GEO1016_debugger::PrintMatrix33(trans.first);
+    
+    // -------------------------------------------------------------
+    
+    GEO1016_debugger::PrintPoints(points_1);  // before normalize
+    auto np = GEO1016_A2::NormalizePoints(points_1);
+    std::cout << "after normalize: \n";
+    GEO1016_debugger::PrintPoints(np.first);  // after normalize
