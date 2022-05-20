@@ -29,7 +29,7 @@
 
 using namespace easy3d;
 
-namespace GEO1016_debugger {
+namespace debugger {
     void PrintMatrix33(const Matrix33& M)
     {
         std::cout << M(0, 0) << "," << M(0, 1) << "," << M(0, 2) << '\n';
@@ -340,6 +340,53 @@ namespace GEO1016_A2 {
     }
 
 
+    /*
+    * struct for storing the possible R, t combinations
+    */
+    struct Rt {
+        std::vector<Matrix33> possibleR;  // store two possible Rotation matrices
+        std::vector<Vector3D> possiblet;  // store two possible translation vectors
+        Rt() { possibleR.reserve(2); possiblet.reserve(2); }
+    };
+
+    /*
+    * getPossibleRt
+    * use Essential matrix to get possible R, t combinations(4 possible combinations in total)
+    * 
+    * @param:
+    * E - Essential matrix
+    * 
+    * @return:
+    * Rt object - contains 4 possible R and ts.
+    */
+    Rt getPossibleRt(const Matrix33& E)
+    {
+        // result Rt object
+        Rt rt;
+
+        // decompose E using SVD
+        int m = E.rows();
+        int n = E.cols();
+        Matrix U(m, m, 0.0);   // initialized with 0s
+        Matrix S(m, n, 0.0);   // initialized with 0s
+        Matrix V(n, n, 0.0);   // initialized with 0s
+        svd_decompose(E, U, S, V);  // E = USV.transpose()
+
+        // define W matrix
+        Matrix33 W(
+            0, -1, 0,
+            1, 0, 0,
+            0, 0, 1
+        );
+
+        // get possible R (1)
+        
+
+
+        return rt;
+
+    }
+    
 }
 
 /**
@@ -501,8 +548,14 @@ bool Triangulation::triangulation(
     Matrix33 E = GEO1016_A2::getEssential(F, fx, fy, cx, cy);
     // get Essential matrix --------------------------------------------------------------------------
 
+
+    // get relative pose -----------------------------------------------------------------------------
+    auto rt = GEO1016_A2::getPossibleRt(E);
+
+    // get relative pose -----------------------------------------------------------------------------
+    
     // debug
-    GEO1016_debugger::PrintMatrix33(E);
+    //debugger::PrintMatrix33(E);
 
     // TODO: Reconstruct 3D points. The main task is
     //      - triangulate a pair of image points (i.e., compute the 3D coordinates for each corresponding point pair)
