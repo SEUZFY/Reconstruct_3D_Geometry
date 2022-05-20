@@ -252,13 +252,57 @@ namespace GEO1016_A2 {
     * (3)denormalization - scale F such that F(2, 2) = 1.0
     * 
     * @param:
-    * F_fromSVD: Fundamental matrix from Wf=0, solve W using SVD
+    * initial_F: initial Fundamental matrix from Wf=0, solve W using SVD
+    * T:  transform matrix for points_0
+    * T_: transform matrix for points_1
     * @return:
     * std::pair<Matrix33, bool>, first is the processed F matrix, second is its validation status
     */
-    std::pair<Matrix33, bool> getFundamental(const Matrix33& F_fromSVD)
+    std::pair<Matrix33, bool> getFundamental(
+        const Matrix33& initial_F, const Matrix33& T, const Matrix33& T_)
     {
+        // elements will be returned ----------------------------------
+        Matrix33 F;
+        bool F_valid = false;
+        // elements will be returned ----------------------------------
 
+        // decompose F using SVD
+        int m = initial_F.rows();
+        int n = initial_F.cols();
+
+        Matrix U(m, m, 0.0);   // initialized with 0s
+        Matrix S(m, n, 0.0);   // initialized with 0s
+        Matrix V(n, n, 0.0);   // initialized with 0s
+        svd_decompose(initial_F, U, S, V);
+        
+        // rank-2 approximation - make S(2, 2) = 0
+        S(2, 2) = 0;
+        
+        // update F
+        F = U * S * V;
+        
+        // denormalize F: F = T'_transpose() * F * T scale F such that F(2, 2) = 1.0
+        F = T_.transpose() * F * T;
+        
+        // scale F such that F(2, 2) = 1.0 (F is up to scale)
+        const double threshold = 1e-10;  // check whether F(2, 2) is 0, NB: threshold need to be small enough
+        if (abs(F(2, 2) < threshold))
+        {
+            LOG(ERROR) << "the last element in Fundamental matrix is considered equal to 0\n"
+                << "please check matrix calculation or maybe the threshold is set too large\n";
+            return std::make_pair(F, F_valid);  // F_valid remains false, will not trigger further process
+        }
+        const double scale = 1.0 / F(2, 2);
+        F = F * scale;  // scale F
+
+        if (abs(F(2, 2) - 1.0) > threshold)
+        {
+            LOG(ERROR) << "after scaling, F(2, 2) is not equal to 1\n"
+                << "please check the scaling process or maybe the threshold is set too small\n";
+        }
+        F_valid = true;  // if F is correctly constructed, set its validation status to true
+
+        return std::make_pair(F, F_valid);
     }
 
 }
@@ -394,18 +438,29 @@ bool Triangulation::triangulation(
     // normalize points ------------------------------------------------------------------------------
 
 
-    // get fundamental matrix from Wf = 0, use SVD to solve W ----------------------------------------
+    // get initial Fundamental matrix from Wf = 0, use SVD to solve W --------------------------------
     auto Funda = GEO1016_A2::getInitialFundamental(normal_points_0, normal_points_1);
     if (Funda.second == false)
     {
-        LOG(ERROR) << "construct Fundamental Matrix from Wf=0 (solved using SVD) fail, please check\n"
-            << "getFundaFromSVD() function in triangulation_method.cpp\n";
+        LOG(ERROR) << "construct initial Fundamental Matrix from Wf=0 (solved using SVD) fail, please check\n"
+            << "getInitialFundamental() function in triangulation_method.cpp\n";
         return false;
     }
-    Matrix33 F_fromSVD = Funda.first;
-    // get fundamental matrix from Wf = 0, use SVD to solve W ----------------------------------------
+    Matrix33 initial_F = Funda.first;
+    // get initial Fundamental matrix from Wf = 0, use SVD to solve W --------------------------------
 
-    GEO1016_debugger::PrintMatrix33(F_fromSVD);
+    
+    // get Fundamental matrix ------------------------------------------------------------------------
+    auto FF = GEO1016_A2::getFundamental(initial_F, T, T_);
+    if (FF.second == false)
+    {
+        LOG(ERROR) << "get Fundamental Matrix fail, please check getFundamental() function\n"
+            << "in triangulation_method.cpp\n";
+        return false;
+    }
+    Matrix33 F = FF.first;
+    GEO1016_debugger::PrintMatrix33(F);
+    // get Fundamental matrix ------------------------------------------------------------------------
 
 
     // TODO: Reconstruct 3D points. The main task is
