@@ -305,6 +305,41 @@ namespace GEO1016_A2 {
         return std::make_pair(F, F_valid);
     }
 
+
+    /*
+    * get Essential matrix
+    * E = K'.transpose() * F * K
+    * in this assignment K' = K, since only one camera is used
+    * and assume skewness = 0
+    * therefore E = K.transpose() * F * K
+    * where 
+    *     fx  0  cx
+    * E = 0  fy  cy
+    *     0   0   1
+    * 
+    * @param:
+    * F - Fundamental matrix
+    * fx, fy - focal lengths
+    * cx, cy - principal point
+    * 
+    * @return:
+    * Essential matrix
+    */
+    Matrix33 getEssential(
+        const Matrix33& F,
+        double fx, double fy,
+        double cx, double cy)
+    {
+        Matrix33 K
+        (
+            fx, 0, cx,
+             0, fy,cy,
+             0, 0, 1
+        );
+        return K.transpose() * F * K;
+    }
+
+
 }
 
 /**
@@ -462,8 +497,12 @@ bool Triangulation::triangulation(
     // get Fundamental matrix ------------------------------------------------------------------------
 
 
+    // get Essential matrix --------------------------------------------------------------------------
+    Matrix33 E = GEO1016_A2::getEssential(F, fx, fy, cx, cy);
+    // get Essential matrix --------------------------------------------------------------------------
+
     // debug
-    GEO1016_debugger::PrintMatrix33(F);
+    GEO1016_debugger::PrintMatrix33(E);
 
     // TODO: Reconstruct 3D points. The main task is
     //      - triangulate a pair of image points (i.e., compute the 3D coordinates for each corresponding point pair)
