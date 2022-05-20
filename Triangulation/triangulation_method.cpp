@@ -459,7 +459,6 @@ bool Triangulation::triangulation(
         return false;
     }
     Matrix33 F = FF.first;
-    GEO1016_debugger::PrintMatrix33(F);
     // get Fundamental matrix ------------------------------------------------------------------------
 
 
