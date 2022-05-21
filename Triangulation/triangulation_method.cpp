@@ -547,11 +547,18 @@ namespace GEO1016_A2 {
 
         Matrix34 M = getProjectionMatrix(K, I, zero_t);  // projection matrix for image_0
         Matrix34 M_;  // projection matrix for image_1, 4 possibilities
+        std::vector<Vector3D> pts_3d;  // store the estimated 3d points
+        pts_3d.reserve(points_0.size());
         // variables help to estimate the combinations -------------------------
         
 
-        // combination 01 ------------------------------------------------------
-        debugger::PrintMatrix(M);
+        // combination R:0, t:1 ------------------------------------------------------
+        M_ = getProjectionMatrix(K, rt.possibleR[0], rt.possiblet[1]);
+        std::cout << "size: " << pts_3d.size() << '\n';
+        pts_3d = getTriangulatedPoints3D(M, M_, points_0, points_1);
+        std::cout << "size: " << pts_3d.size() << '\n';
+        pts_3d.clear();
+        std::cout << "size: " << pts_3d.size() << '\n';
 
         // return results
         return std::make_pair(result_R, result_t);
