@@ -577,12 +577,14 @@ namespace GEO1016_A2 {
         Matrix34 M_;  // projection matrix for image_1, 4 possibilities
         // variables help to estimate the combinations -----------------------------------------------
         
-
         
-        
-        
-        auto test = [&](
-            int p_r, int p_t,
+        // define lambda function: getCount
+        // because (basically)same code content inside this getRelativePose() function
+        // use lambda to avoid repetition
+        // usage:
+        // p_r - index of rt.possibleR, p_t - index of rt.possiblet, i - index of count array --------
+        auto getCount = [&](
+            int p_r, int p_t, int i,
             const Rt& rt, const Matrix33& K, const Matrix& M,  // read - only
             Result& res, std::pair<std::size_t, std::size_t>(&count)[4])
         {
@@ -593,30 +595,39 @@ namespace GEO1016_A2 {
 
                 // (1) points in camera 1 - World CRS
                 res.points3D = getTriangulatedPoints3D(M, M_, points_0, points_1);  // in World_CRS
-                count[0].first = CountPositiveZ(res.points3D);
+                count[i].first = CountPositiveZ(res.points3D);
 
                 // (2) points in camera 2 - Q = R * P + t
                 for (auto& p : res.points3D)
                     p = R * p + t;
-                count[0].second = CountPositiveZ(res.points3D);
+                count[i].second = CountPositiveZ(res.points3D);
 
                 res.points3D.clear();  // for next use
             }
         };
-
-        test(1, 1, rt, K, M, res, count);
-        std::cout << count[0].first << " " << count[0].second << '\n';
-
-        //std::cout << "size: " << res.points.size() << '\n';
-        //res.points = getTriangulatedPoints3D(M, M_, points_0, points_1);
-        //std::cout << "size: " << res.points.size() << '\n';
-        //res.points.clear();
-        //std::cout << "size: " << res.points.size() << '\n';
-        /*std::vector<Vector3D> pts;
-        pts.push_back(Vector3D(0, 0, 1)); pts.push_back(Vector3D(0, 0, 2));
-        pts.push_back(Vector3D(0, 0, 0)); pts.push_back(Vector3D(0, 0, -1));
+        // lambda definition -------------------------------------------------------------------------
         
-        std::cout << CountPositiveZ(pts);*/
+
+        // four different R, t combinations ----------------------------------------------------------
+        // combination R:0, t:0, write result to count[0]
+        getCount(0, 0, 0, rt, K, M, res, count);
+
+        // combination R:0, t:1, write result to count[1]
+        getCount(0, 1, 1, rt, K, M, res, count);
+        
+        // combination R:1, t:0, write result to count[2]
+        getCount(1, 0, 2, rt, K, M, res, count);
+        
+        // combination R:1, t:1, write result to count[3]
+        getCount(1, 1, 3, rt, K, M, res, count);
+        // four different R, t combinations ----------------------------------------------------------
+
+        std::cout << count[0].first << " " << count[0].second << '\n';
+        std::cout << count[1].first << " " << count[1].second << '\n';
+        std::cout << count[2].first << " " << count[2].second << '\n';
+        std::cout << count[3].first << " " << count[3].second << '\n';
+
+        
 
         // return results
         return res;
