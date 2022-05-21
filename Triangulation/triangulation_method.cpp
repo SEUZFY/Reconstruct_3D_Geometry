@@ -506,6 +506,17 @@ namespace GEO1016_A2 {
 
 
     /*
+    * struct to store the result R, t
+    * and the triangulated 3d points
+    */
+    struct Result {
+        Matrix33 res_R;
+        Vector3D res_t;
+        std::vector<Vector3D> res_points;
+        Result(std::size_t size = 160) { res_points.reserve(size); }
+    };
+
+    /*
     * getRelativePose - find best R ant t
     * @param:
     * E - Essential matrix
