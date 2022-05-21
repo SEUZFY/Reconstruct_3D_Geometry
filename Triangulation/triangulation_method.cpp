@@ -512,8 +512,8 @@ namespace GEO1016_A2 {
     struct Result {
         Matrix33 R;
         Vector3D t;
-        std::vector<Vector3D> points;
-        Result(std::size_t size = 160) { points.reserve(size); }
+        std::vector<Vector3D> points3D;
+        Result(std::size_t size = 160) { points3D.reserve(size); }
     };
 
     /*
@@ -553,16 +553,16 @@ namespace GEO1016_A2 {
     {
         // elements will be returned
         Result res;  // if points size is not 160, use: Result res(points_size) instead;
-
-
-        // mark which R,t combination is the best estimation
-        // e.g. flag01 - rt.possibleR[0] and rt.possiblet[1]
-        bool flag00(false), flag01(false), flag10(false), flag11(false);
+        
+        // store the positive z values for each R, t combination
+        // sequence of R,t: 00 01 10 11 e.g. count_z[1] - R[0]t[1]
+        // first is the number in camera 1(World_CRS), second is the number in camera 2
+        std::pair<std::size_t, std::size_t> count[4]{};
         
         // find possible rt
         auto rt = getPossibleRt(E);
 
-        // variables help to estimate the combinations -------------------------------
+        // variables help to estimate the combinations -----------------------------------------------
         Matrix33 R;
         Vector3D t;
 
@@ -575,21 +575,102 @@ namespace GEO1016_A2 {
 
         Matrix34 M = getProjectionMatrix(K, I, zero_t);  // projection matrix for image_0
         Matrix34 M_;  // projection matrix for image_1, 4 possibilities
-        // variables help to estimate the combinations -------------------------------
+        // variables help to estimate the combinations -----------------------------------------------
         
 
-        // combination R:0, t:1 ------------------------------------------------------
-        M_ = getProjectionMatrix(K, rt.possibleR[0], rt.possiblet[1]);
-        std::cout << "size: " << res.points.size() << '\n';
-        res.points = getTriangulatedPoints3D(M, M_, points_0, points_1);
-        std::cout << "size: " << res.points.size() << '\n';
-        res.points.clear();
-        std::cout << "size: " << res.points.size() << '\n';
-        std::vector<Vector3D> pts;
+        // combination R:0, t:0 ----------------------------------------------------------------------
+        R = rt.possibleR[0]; t = rt.possiblet[0];
+        if ((determinant(R) - 1.0) < 1e-8)  // determinant(R) = 1.0 (within a tiny threshold)
+        {
+            M_ = getProjectionMatrix(K, R, t);
+
+            // (1) points in camera 1 - World CRS
+            res.points3D = getTriangulatedPoints3D(M, M_, points_0, points_1);  // in World_CRS
+            count[0].first = CountPositiveZ(res.points3D);
+
+            // (2) points in camera 2 - Q = R * P + t
+            for (auto& p : res.points3D)
+                p = R * p + t;
+            count[0].second = CountPositiveZ(res.points3D);
+
+            res.points3D.clear();  // for next use
+        }
+        // combination R:0, t:0 ----------------------------------------------------------------------
+        
+
+        // combination R:0, t:1 ----------------------------------------------------------------------
+        t = rt.possiblet[1];
+        if ((determinant(R) - 1.0) < 1e-8)  // determinant(R) = 1.0 (within a tiny threshold)
+        {
+            M_ = getProjectionMatrix(K, R, t);
+
+            // (1) points in camera 1 - World CRS
+            res.points3D = getTriangulatedPoints3D(M, M_, points_0, points_1);  // in World_CRS
+            count[1].first = CountPositiveZ(res.points3D);
+
+            // (2) points in camera 2 - Q = R * P + t
+            for (auto& p : res.points3D)
+                p = R * p + t;
+            count[1].second = CountPositiveZ(res.points3D);
+
+            res.points3D.clear();  // for next use
+        }
+        // combination R:0, t:1 ----------------------------------------------------------------------
+        
+
+        // combination R:1, t:0 ----------------------------------------------------------------------
+        R = rt.possibleR[1]; t = rt.possiblet[0];
+        if ((determinant(R) - 1.0) < 1e-8)  // determinant(R) = 1.0 (within a tiny threshold)
+        {
+            M_ = getProjectionMatrix(K, R, t);
+
+            // (1) points in camera 1 - World CRS
+            res.points3D = getTriangulatedPoints3D(M, M_, points_0, points_1);  // in World_CRS
+            count[2].first = CountPositiveZ(res.points3D);
+
+            // (2) points in camera 2 - Q = R * P + t
+            for (auto& p : res.points3D)
+                p = R * p + t;
+            count[2].second = CountPositiveZ(res.points3D);
+
+            res.points3D.clear();  // for next use
+        }
+        // combination R:1, t:0 ----------------------------------------------------------------------
+        
+        
+        // combination R:1, t:1 ----------------------------------------------------------------------
+        t = rt.possiblet[1];
+        if ((determinant(R) - 1.0) < 1e-8)  // determinant(R) = 1.0 (within a tiny threshold)
+        {
+            M_ = getProjectionMatrix(K, R, t);
+
+            // (1) points in camera 1 - World CRS
+            res.points3D = getTriangulatedPoints3D(M, M_, points_0, points_1);  // in World_CRS
+            count[3].first = CountPositiveZ(res.points3D);
+
+            // (2) points in camera 2 - Q = R * P + t
+            for (auto& p : res.points3D)
+                p = R * p + t;
+            count[3].second = CountPositiveZ(res.points3D);
+
+            res.points3D.clear();  // for next use
+        }
+        // combination R:1, t:0 ----------------------------------------------------------------------
+        
+        
+        
+        std::cout << count[3].first << " " << count[3].second << '\n';
+
+        //std::cout << "size: " << res.points.size() << '\n';
+        //res.points = getTriangulatedPoints3D(M, M_, points_0, points_1);
+        //std::cout << "size: " << res.points.size() << '\n';
+        //res.points.clear();
+        //std::cout << "size: " << res.points.size() << '\n';
+        /*std::vector<Vector3D> pts;
         pts.push_back(Vector3D(0, 0, 1)); pts.push_back(Vector3D(0, 0, 2));
         pts.push_back(Vector3D(0, 0, 0)); pts.push_back(Vector3D(0, 0, -1));
         
-        std::cout << CountPositiveZ(pts);
+        std::cout << CountPositiveZ(pts);*/
 
         // return results
         return res;
