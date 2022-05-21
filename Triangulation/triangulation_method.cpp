@@ -306,6 +306,20 @@ namespace GEO1016_A2 {
 
 
     /*
+    * get intrinsicK matrix
+    * assume skewness is 0
+    */
+    Matrix33 getIntrinsicK(double fx, double fy, double cx, double cy)
+    {
+        return Matrix33(
+            fx, 0, cx,
+            0, fy, cy,
+            0, 0, 1
+        );
+    }
+
+
+    /*
     * get Essential matrix
     * E = K'.transpose() * F * K
     * in this assignment K' = K, since only one camera is used
@@ -318,23 +332,13 @@ namespace GEO1016_A2 {
     * 
     * @param:
     * F - Fundamental matrix
-    * fx, fy - focal lengths
-    * cx, cy - principal point
+    * K - intrinsic matrix
     * 
     * @return:
     * Essential matrix
     */
-    Matrix33 getEssential(
-        const Matrix33& F,
-        double fx, double fy,
-        double cx, double cy)
+    Matrix33 getEssential(const Matrix33& F, const Matrix33& K)
     {
-        Matrix33 K
-        (
-            fx, 0, cx,
-             0, fy,cy,
-             0, 0, 1
-        );
         return K.transpose() * F * K;
     }
 
@@ -396,6 +400,18 @@ namespace GEO1016_A2 {
 
         return rt;
     }
+
+
+    /*
+    * getProjectionMatrix
+    * p = MP
+    * M = K[R t] - M is 3 by 4 matrix
+    * for image_0, R = I, t = [0, 0, 0]
+    * for image_0, R, t - 4 different combinations
+    * 
+    * @param:
+    * 
+    */
     
 }
 
@@ -461,15 +477,15 @@ bool Triangulation::triangulation(
         0, 0, 1);
 
     /// define and initialize a 3 by 4 matrix
-    Matrix34 M(1.1, 2.2, 3.3, 0,
+    Matrix34 M1(1.1, 2.2, 3.3, 0,
         0, 2.2, 3.3, 1,
         0, 0, 1, 1);
 
     /// set first row by a vector
-    M.set_row(0, Vector4D(1.1, 2.2, 3.3, 4.4));
+    //M.set_row(0, Vector4D(1.1, 2.2, 3.3, 4.4));
 
     /// set second column by a vector
-    M.set_column(1, Vector3D(5.5, 5.5, 5.5));
+    //M.set_column(1, Vector3D(5.5, 5.5, 5.5));
 
     /// define a 15 by 9 matrix (and all elements initialized to 0.0)
     Matrix W(15, 9, 0.0);
@@ -492,7 +508,7 @@ bool Triangulation::triangulation(
     Matrix33 I = Matrix::identity(3, 3, 1.0);
 
     /// matrix-vector product
-    Vector3D v = M * Vector4D(1, 2, 3, 4); // M is 3 by 4
+    //Vector3D v = M * Vector4D(1, 2, 3, 4); // M is 3 by 4
 
     ///For more functions of Matrix and Vector, please refer to 'matrix.h' and 'vector.h'
 
@@ -511,6 +527,7 @@ bool Triangulation::triangulation(
     //      - recover rotation R and t.
 
 
+
     // get transform matrix --------------------------------------------------------------------------
     auto trans_0 = GEO1016_A2::getNormalizeTransformMatrix(points_0);
     auto trans_1 = GEO1016_A2::getNormalizeTransformMatrix(points_1);
@@ -524,10 +541,12 @@ bool Triangulation::triangulation(
     // get transform matrix --------------------------------------------------------------------------
 
 
+
     // normalize points ------------------------------------------------------------------------------
     auto normal_points_0 = GEO1016_A2::NormalizePoints(points_0, T);
     auto normal_points_1 = GEO1016_A2::NormalizePoints(points_1, T_);
     // normalize points ------------------------------------------------------------------------------
+
 
 
     // get initial Fundamental matrix from Wf = 0, use SVD to solve W --------------------------------
@@ -542,6 +561,7 @@ bool Triangulation::triangulation(
     // get initial Fundamental matrix from Wf = 0, use SVD to solve W --------------------------------
 
     
+
     // get Fundamental matrix ------------------------------------------------------------------------
     auto FF = GEO1016_A2::getFundamental(initial_F, T, T_);
     if (FF.second == false)
@@ -554,18 +574,29 @@ bool Triangulation::triangulation(
     // get Fundamental matrix ------------------------------------------------------------------------
 
 
+
+    // get intrinsic matrix K ------------------------------------------------------------------------
+    Matrix33 K = GEO1016_A2::getIntrinsicK(fx, fy, cx, cy);
+    // get intrinsic matrix K ------------------------------------------------------------------------
+
+
+
     // get Essential matrix --------------------------------------------------------------------------
-    Matrix33 E = GEO1016_A2::getEssential(F, fx, fy, cx, cy);
+    Matrix33 E = GEO1016_A2::getEssential(F, K);
     // get Essential matrix --------------------------------------------------------------------------
+
 
 
     // get relative pose -----------------------------------------------------------------------------
     auto rt = GEO1016_A2::getPossibleRt(E);
-
+    //auto point_3d = GEO1016_A2::getPoint3D(points_0, M1);
     // get relative pose -----------------------------------------------------------------------------
     
+
+
     // debug
-    //debugger::PrintMatrix33(E);
+    //debugger::PrintMatrix(K);
+    //std::cout << determinant(rt.possibleR[1]);
 
     // TODO: Reconstruct 3D points. The main task is
     //      - triangulate a pair of image points (i.e., compute the 3D coordinates for each corresponding point pair)
