@@ -578,11 +578,11 @@ namespace GEO1016_A2 {
         // variables help to estimate the combinations -----------------------------------------------
         
         
-        // define lambda function: getCount
-        // because (basically)same code content inside this getRelativePose() function
-        // use lambda to avoid repetition
-        // usage:
-        // p_r - index of rt.possibleR, p_t - index of rt.possiblet, i - index of count array --------
+        // define Lambda function: getCount
+        // because the following code is (basically) the same for 4 different R, t combinations
+        // use Lambda to avoid repetition
+        // @changeable params:
+        //  p_r - index of rt.possibleR, p_t - index of rt.possiblet, i - index of count array --------
         auto getCount = [&](
             int p_r, int p_t, int i,
             const Rt& rt, const Matrix33& K, const Matrix& M,  // read - only
@@ -605,7 +605,7 @@ namespace GEO1016_A2 {
                 res.points3D.clear();  // for next use
             }
         };
-        // lambda definition -------------------------------------------------------------------------
+        // Lambda definition 1 -----------------------------------------------------------------------
         
 
         // four different R, t combinations ----------------------------------------------------------
@@ -621,6 +621,23 @@ namespace GEO1016_A2 {
         // combination R:1, t:1, write result to count[3]
         getCount(1, 1, 3, rt, K, M, res, count);
         // four different R, t combinations ----------------------------------------------------------
+
+
+        // define Lambda function: getResult
+        // because the following code is the same for 4 different R, t combinations
+        // @changeable param:
+        //  i - index of count array -----------------------------------------------------------------
+        auto getResult = [&](
+            int i,
+            const Rt& rt, const Matrix33& K, const Matrix& M,  // read - only
+            Result& res, std::pair<std::size_t, std::size_t>(&count)[4])
+        {
+
+        };
+        // Lambda definition 2 -----------------------------------------------------------------------
+
+        debugger::PrintMatrix(res.R); debugger::PrintVector(res.t);
+        std::cout << res.points3D.size() << '\n';
 
         std::cout << count[0].first << " " << count[0].second << '\n';
         std::cout << count[1].first << " " << count[1].second << '\n';
