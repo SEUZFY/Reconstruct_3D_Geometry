@@ -349,17 +349,7 @@ namespace GEO1016_A2 {
     struct Rt {
         std::vector<Matrix33> possibleR;  // store two possible Rotation matrices
         std::vector<Vector3D> possiblet;  // store two possible translation vectors
-        Matrix33 I;  // identical matrix
-        Vector3D zero_t;  // translation vector: [0, 0, 0]
-        Rt() 
-        { 
-            possibleR.reserve(2); 
-            possiblet.reserve(2); 
-            I.set_row(0, { 1, 0, 0 });
-            I.set_row(1, { 0, 1, 0 });
-            I.set_row(2, { 0, 0, 1 });
-            zero_t[0] = zero_t[1] = zero_t[2] = 0.0;
-        }      
+        Rt() { possibleR.reserve(2); possiblet.reserve(2); }      
     };
 
     /*
@@ -513,6 +503,59 @@ namespace GEO1016_A2 {
         return points_3d;
     }
     
+
+
+    /*
+    * getRelativePose - find best R ant t
+    * @param:
+    * E - Essential matrix
+    * K - intrinsic matrix
+    * points_0 - 2d points for image_0
+    * points_1 - 2d points for image_1
+    * 
+    * @return:
+    * std::pair<Matrix33, Vector3D> - result R and t
+    */
+    std::pair<Matrix33, Vector3D> getRelativePose(
+        const Matrix33& E,
+        const Matrix33& K,
+        const std::vector<Vector2D>& points_0,
+        const std::vector<Vector2D>& points_1)
+    {
+        // elements will be returned
+        Matrix33 result_R;
+        Vector3D result_t;
+
+
+        // mark which R,t combination is the best estimation
+        // e.g. flag01 - rt.possibleR[0] and rt.possiblet[1]
+        bool flag00(false), flag01(false), flag10(false), flag11(false);
+        
+        // find possible rt
+        auto rt = getPossibleRt(E);
+
+        // variables help to estimate the combinations -------------------------
+        Matrix33 R;
+        Vector3D t;
+
+        Matrix33 I(
+            1, 0, 0,
+            0, 1, 0,
+            0, 0, 1
+        );
+        Vector3D zero_t(0.0, 0.0, 0.0);
+
+        Matrix34 M = getProjectionMatrix(K, I, zero_t);  // projection matrix for image_0
+        Matrix34 M_;  // projection matrix for image_1, 4 possibilities
+        // variables help to estimate the combinations -------------------------
+        
+
+        // combination 01 ------------------------------------------------------
+        debugger::PrintMatrix(M);
+
+        // return results
+        return std::make_pair(result_R, result_t);
+    }
 }
 
 /**
@@ -606,15 +649,7 @@ bool Triangulation::triangulation(
 
 
     /* get relative pose ----------------------------------------------------------------------------*/
-    auto rt = GEO1016_A2::getPossibleRt(E);
-    Matrix34 M = GEO1016_A2::getProjectionMatrix(K, rt.possibleR[0], rt.possiblet[0]);
-    Matrix34 M_ = GEO1016_A2::getProjectionMatrix(K, rt.possibleR[0], rt.possiblet[1]);
-    auto points3d = GEO1016_A2::getTriangulatedPoints3D(M, M_, points_0, points_1);
-
-    debugger::PrintMatrix(K); std::cout << '\n';
-    M = GEO1016_A2::getProjectionMatrix(K, rt.I, rt.zero_t);
-    std::cout << "M for camera 1: \n";
-    debugger::PrintMatrix(M);
+    auto rp = GEO1016_A2::getRelativePose(E, K, points_0, points_1);
     /* get relative pose-----------------------------------------------------------------------------*/
     
 
