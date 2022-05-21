@@ -560,14 +560,14 @@ bool Triangulation::triangulation(
 
 
 
-    // normalize points ------------------------------------------------------------------------------
+    /* normalize points------------------------------------------------------------------------------*/
     auto normal_points_0 = GEO1016_A2::NormalizePoints(points_0, T);
     auto normal_points_1 = GEO1016_A2::NormalizePoints(points_1, T_);
-    // normalize points ------------------------------------------------------------------------------
+    /* normalize points------------------------------------------------------------------------------*/
 
 
 
-    // get initial Fundamental matrix from Wf = 0, use SVD to solve W --------------------------------
+    /* get initial Fundamental matrix from Wf = 0, use SVD to solve W--------------------------------*/
     auto Funda = GEO1016_A2::getInitialFundamental(normal_points_0, normal_points_1);
     if (Funda.second == false)
     {
@@ -576,11 +576,11 @@ bool Triangulation::triangulation(
         return false;
     }
     Matrix33 initial_F = Funda.first;
-    // get initial Fundamental matrix from Wf = 0, use SVD to solve W --------------------------------
+    /* get initial Fundamental matrix from Wf = 0, use SVD to solve W--------------------------------*/
 
     
 
-    // get Fundamental matrix ------------------------------------------------------------------------
+    /* get Fundamental matrix------------------------------------------------------------------------*/
     auto FF = GEO1016_A2::getFundamental(initial_F, T, T_);
     if (FF.second == false)
     {
@@ -589,23 +589,23 @@ bool Triangulation::triangulation(
         return false;
     }
     Matrix33 F = FF.first;
-    // get Fundamental matrix ------------------------------------------------------------------------
+    /* get Fundamental matrix------------------------------------------------------------------------*/
 
 
 
-    // get intrinsic matrix K ------------------------------------------------------------------------
+    /* get intrinsic matrix K------------------------------------------------------------------------*/
     Matrix33 K = GEO1016_A2::getIntrinsicK(fx, fy, cx, cy);
-    // get intrinsic matrix K ------------------------------------------------------------------------
+    /* get intrinsic matrix K------------------------------------------------------------------------*/
 
 
 
-    // get Essential matrix --------------------------------------------------------------------------
+    /* get Essential matrix--------------------------------------------------------------------------*/
     Matrix33 E = GEO1016_A2::getEssential(F, K);
-    // get Essential matrix --------------------------------------------------------------------------
+    /* get Essential matrix--------------------------------------------------------------------------*/
 
 
 
-    // get relative pose -----------------------------------------------------------------------------
+    /* get relative pose ----------------------------------------------------------------------------*/
     auto rt = GEO1016_A2::getPossibleRt(E);
     Matrix34 M = GEO1016_A2::getProjectionMatrix(K, rt.possibleR[0], rt.possiblet[0]);
     Matrix34 M_ = GEO1016_A2::getProjectionMatrix(K, rt.possibleR[0], rt.possiblet[1]);
@@ -615,7 +615,7 @@ bool Triangulation::triangulation(
     M = GEO1016_A2::getProjectionMatrix(K, rt.I, rt.zero_t);
     std::cout << "M for camera 1: \n";
     debugger::PrintMatrix(M);
-    // get relative pose -----------------------------------------------------------------------------
+    /* get relative pose-----------------------------------------------------------------------------*/
     
 
 
