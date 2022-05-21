@@ -636,15 +636,22 @@ namespace GEO1016_A2 {
         };
         // Lambda definition 2 -----------------------------------------------------------------------
 
-        debugger::PrintMatrix(res.R); debugger::PrintVector(res.t);
+        //debugger::PrintMatrix(res.R); debugger::PrintVector(res.t);
+        //std::cout << res.points3D.size() << '\n';
+
+        //std::cout << count[0].first << " " << count[0].second << '\n';
+        //std::cout << count[1].first << " " << count[1].second << '\n';
+        //std::cout << count[2].first << " " << count[2].second << '\n';
+        //std::cout << count[3].first << " " << count[3].second << '\n';
+
+        res.R = rt.possibleR[0];
+        res.t = rt.possiblet[1];
+        M_ = getProjectionMatrix(K, res.R, res.t);
+        res.points3D = getTriangulatedPoints3D(M, M_, points_0, points_1);
+
+        debugger::PrintMatrix(res.R); std::cout << '\n';
+        debugger::PrintVector(res.t); std::cout << '\n';
         std::cout << res.points3D.size() << '\n';
-
-        std::cout << count[0].first << " " << count[0].second << '\n';
-        std::cout << count[1].first << " " << count[1].second << '\n';
-        std::cout << count[2].first << " " << count[2].second << '\n';
-        std::cout << count[3].first << " " << count[3].second << '\n';
-
-        
 
         // return results
         return res;
@@ -652,10 +659,6 @@ namespace GEO1016_A2 {
 
 
 
-
-
-
-   
 }
 
 /**
@@ -749,7 +752,10 @@ bool Triangulation::triangulation(
 
 
     /* get relative pose ----------------------------------------------------------------------------*/
-    auto rp = GEO1016_A2::getRelativePose(E, K, points_0, points_1);
+    auto res = GEO1016_A2::getRelativePose(E, K, points_0, points_1);
+    R = res.R;
+    t = res.t;
+    points_3d = res.points3D;
     /* get relative pose-----------------------------------------------------------------------------*/
     
 
