@@ -559,7 +559,7 @@ namespace GEO1016_A2 {
         // first is the number in camera 1(World_CRS), second is the number in camera 2
         std::pair<std::size_t, std::size_t> count[4]{};
         
-        // find possible rt
+        // find possible R, t
         auto rt = getPossibleRt(E);
 
         // variables help to estimate the combinations -----------------------------------------------
@@ -578,88 +578,34 @@ namespace GEO1016_A2 {
         // variables help to estimate the combinations -----------------------------------------------
         
 
-        // combination R:0, t:0 ----------------------------------------------------------------------
-        R = rt.possibleR[0]; t = rt.possiblet[0];
-        if ((determinant(R) - 1.0) < 1e-8)  // determinant(R) = 1.0 (within a tiny threshold)
+        
+        
+        
+        auto test = [&](
+            int p_r, int p_t,
+            const Rt& rt, const Matrix33& K, const Matrix& M,  // read - only
+            Result& res, std::pair<std::size_t, std::size_t>(&count)[4])
         {
-            M_ = getProjectionMatrix(K, R, t);
+            R = rt.possibleR[p_r]; t = rt.possiblet[p_t];
+            if ((determinant(R) - 1.0) < 1e-8)  // determinant(R) = 1.0 (within a tiny threshold)
+            {
+                M_ = getProjectionMatrix(K, R, t);
 
-            // (1) points in camera 1 - World CRS
-            res.points3D = getTriangulatedPoints3D(M, M_, points_0, points_1);  // in World_CRS
-            count[0].first = CountPositiveZ(res.points3D);
+                // (1) points in camera 1 - World CRS
+                res.points3D = getTriangulatedPoints3D(M, M_, points_0, points_1);  // in World_CRS
+                count[0].first = CountPositiveZ(res.points3D);
 
-            // (2) points in camera 2 - Q = R * P + t
-            for (auto& p : res.points3D)
-                p = R * p + t;
-            count[0].second = CountPositiveZ(res.points3D);
+                // (2) points in camera 2 - Q = R * P + t
+                for (auto& p : res.points3D)
+                    p = R * p + t;
+                count[0].second = CountPositiveZ(res.points3D);
 
-            res.points3D.clear();  // for next use
-        }
-        // combination R:0, t:0 ----------------------------------------------------------------------
-        
+                res.points3D.clear();  // for next use
+            }
+        };
 
-        // combination R:0, t:1 ----------------------------------------------------------------------
-        t = rt.possiblet[1];
-        if ((determinant(R) - 1.0) < 1e-8)  // determinant(R) = 1.0 (within a tiny threshold)
-        {
-            M_ = getProjectionMatrix(K, R, t);
-
-            // (1) points in camera 1 - World CRS
-            res.points3D = getTriangulatedPoints3D(M, M_, points_0, points_1);  // in World_CRS
-            count[1].first = CountPositiveZ(res.points3D);
-
-            // (2) points in camera 2 - Q = R * P + t
-            for (auto& p : res.points3D)
-                p = R * p + t;
-            count[1].second = CountPositiveZ(res.points3D);
-
-            res.points3D.clear();  // for next use
-        }
-        // combination R:0, t:1 ----------------------------------------------------------------------
-        
-
-        // combination R:1, t:0 ----------------------------------------------------------------------
-        R = rt.possibleR[1]; t = rt.possiblet[0];
-        if ((determinant(R) - 1.0) < 1e-8)  // determinant(R) = 1.0 (within a tiny threshold)
-        {
-            M_ = getProjectionMatrix(K, R, t);
-
-            // (1) points in camera 1 - World CRS
-            res.points3D = getTriangulatedPoints3D(M, M_, points_0, points_1);  // in World_CRS
-            count[2].first = CountPositiveZ(res.points3D);
-
-            // (2) points in camera 2 - Q = R * P + t
-            for (auto& p : res.points3D)
-                p = R * p + t;
-            count[2].second = CountPositiveZ(res.points3D);
-
-            res.points3D.clear();  // for next use
-        }
-        // combination R:1, t:0 ----------------------------------------------------------------------
-        
-        
-        // combination R:1, t:1 ----------------------------------------------------------------------
-        t = rt.possiblet[1];
-        if ((determinant(R) - 1.0) < 1e-8)  // determinant(R) = 1.0 (within a tiny threshold)
-        {
-            M_ = getProjectionMatrix(K, R, t);
-
-            // (1) points in camera 1 - World CRS
-            res.points3D = getTriangulatedPoints3D(M, M_, points_0, points_1);  // in World_CRS
-            count[3].first = CountPositiveZ(res.points3D);
-
-            // (2) points in camera 2 - Q = R * P + t
-            for (auto& p : res.points3D)
-                p = R * p + t;
-            count[3].second = CountPositiveZ(res.points3D);
-
-            res.points3D.clear();  // for next use
-        }
-        // combination R:1, t:0 ----------------------------------------------------------------------
-        
-        
-        
-        std::cout << count[3].first << " " << count[3].second << '\n';
+        test(1, 1, rt, K, M, res, count);
+        std::cout << count[0].first << " " << count[0].second << '\n';
 
         //std::cout << "size: " << res.points.size() << '\n';
         //res.points = getTriangulatedPoints3D(M, M_, points_0, points_1);
