@@ -380,8 +380,14 @@ namespace GEO1016_A2 {
         );
 
         // get possible R (1)
-        
+        rt.possibleR.emplace_back();
+        rt.possibleR.back() = determinant(U * W * V.transpose()) * U * W * V.transpose();
+        debugger::PrintMatrix(rt.possibleR.back());
 
+        // get possible R (2)
+        rt.possibleR.emplace_back();
+        rt.possibleR.back() = determinant(U * W.transpose() * V.transpose()) * U * W.transpose() * V.transpose();
+        debugger::PrintMatrix(rt.possibleR.back());
 
         return rt;
 
