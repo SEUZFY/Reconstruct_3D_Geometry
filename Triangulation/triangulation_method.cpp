@@ -517,6 +517,24 @@ namespace GEO1016_A2 {
     };
 
     /*
+    * CountPositiveZ
+    * count the number of positive z values of 3d points in World/Relative CRS
+    *
+    * @param:
+    * std::vector<Vector3D> - 3d points
+    *
+    * @return:
+    * the number of points with positive z values
+    */
+    std::size_t CountPositiveZ(const std::vector<Vector3D>& pts_3d)
+    {
+        std::size_t count{};
+        for (const auto& p : pts_3d)
+            count = p.z() > 0 ? ++count : count;
+        return count;
+    }
+
+    /*
     * getRelativePose - find best R ant t
     * @param:
     * E - Essential matrix
@@ -567,10 +585,22 @@ namespace GEO1016_A2 {
         std::cout << "size: " << res.points.size() << '\n';
         res.points.clear();
         std::cout << "size: " << res.points.size() << '\n';
+        std::vector<Vector3D> pts;
+        pts.push_back(Vector3D(0, 0, 1)); pts.push_back(Vector3D(0, 0, 2));
+        pts.push_back(Vector3D(0, 0, 0)); pts.push_back(Vector3D(0, 0, -1));
+        
+        std::cout << CountPositiveZ(pts);
 
         // return results
         return res;
     }
+
+
+
+
+
+
+   
 }
 
 /**
