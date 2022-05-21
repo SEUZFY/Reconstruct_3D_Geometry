@@ -451,6 +451,7 @@ namespace GEO1016_A2 {
         const std::vector<Vector2D>& points_1)
     {
         std::vector<Vector3D> points_3d;  // element will be returned
+        points_3d.reserve(points_0.size());
 
         // define M1, M2, M3 - each row in M -----------------------------------------------
         // M1
@@ -469,23 +470,37 @@ namespace GEO1016_A2 {
         Vector4D M3_(M_(2, 0), M_(2, 1), M_(2, 2), M_(2, 3));
 
         // loop through each correspondence ------------------------------------------------
-        for (int i = 0; i != points_0.size(); ++i)
+        for (std::size_t i = 0; i != points_0.size(); ++i)
         {
             // construct matrix A:
             //  xM3  - M1
             //  yM3  - M2
             // x'M3' - M1'
             // y'M3' - M2'
+            double x  = points_0[i].x(), y  = points_0[i].y();
+            double x_ = points_1[i].x(), y_ = points_1[i].y();
 
+            Matrix44 A;
 
+            A.set_row(0, x  * M3  - M1 );
+            A.set_row(1, y  * M3  - M2 );
+            A.set_row(2, x_ * M3_ - M1_);
+            A.set_row(3, y_ * M3_ - M2_);
+
+            // solve A using SVD
+            int m = A.rows();
+            int n = A.cols();
+            Matrix U(m, m, 0.0);   // initialized with 0s
+            Matrix S(m, n, 0.0);   // initialized with 0s
+            Matrix V(n, n, 0.0);   // initialized with 0s
+            svd_decompose(A, U, S, V);
+
+            Vector4D vlc = V.get_column(V.cols() - 1);  // get the last column of V
+            points_3d.emplace_back();
+            points_3d.back() = vlc.cartesian();  // add the 3d point to the result vector
         }
-        Vector4D a(1, 1, 1, 1);
-        Vector4D b(2, 2, 2, 2);
-        Vector4D c = 5 * a - b;
-        debugger::PrintVector(c);
 
         return points_3d;
-
     }
     
 }
