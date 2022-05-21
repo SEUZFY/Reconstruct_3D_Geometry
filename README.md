@@ -55,3 +55,7 @@ Meanwhile some helpful information should be printed to the console.
   < https://3d.bk.tudelft.nl/liangliang/ > 
 
 * The calibration implementation is [here](https://github.com/SEUZFY/Reconstruct_3D_Geometry/blob/master/Triangulation/triangulation_method.cpp), all the other files are kindly given by [Liang Liang](https://3d.bk.tudelft.nl/liangliang/).
+
+# NEED TO FINISH
+
+* evaluation - variance
