@@ -349,7 +349,17 @@ namespace GEO1016_A2 {
     struct Rt {
         std::vector<Matrix33> possibleR;  // store two possible Rotation matrices
         std::vector<Vector3D> possiblet;  // store two possible translation vectors
-        Rt() { possibleR.reserve(2); possiblet.reserve(2); }
+        Matrix33 I;  // identical matrix
+        Vector3D zero_t;  // translation vector: [0, 0, 0]
+        Rt() 
+        { 
+            possibleR.reserve(2); 
+            possiblet.reserve(2); 
+            I.set_row(0, { 1, 0, 0 });
+            I.set_row(1, { 0, 1, 0 });
+            I.set_row(2, { 0, 0, 1 });
+            zero_t[0] = zero_t[1] = zero_t[2] = 0.0;
+        }      
     };
 
     /*
@@ -526,81 +536,6 @@ bool Triangulation::triangulation(
     ///       implementation, which also makes testing and debugging easier. You can put your other functions above
     ///       triangulation(), or put them in one or multiple separate files.
 
-    std::cout << "\nTODO: I am going to implement the triangulation() function in the following file:" << std::endl
-        << "\t    - triangulation_method.cpp\n\n";
-
-    std::cout << "[Liangliang]:\n"
-        "\tFeel free to use any provided data structures and functions. For your convenience, the\n"
-        "\tfollowing three files implement basic linear algebra data structures and operations:\n"
-        "\t    - Triangulation/matrix.h  Matrices of arbitrary dimensions and related functions.\n"
-        "\t    - Triangulation/vector.h  Vectors of arbitrary dimensions and related functions.\n"
-        "\t    - Triangulation/matrix_algo.h  Determinant, inverse, SVD, linear least-squares...\n"
-        "\tPlease refer to the above files for a complete list of useful functions and their usage.\n\n"
-        "\tIf you choose to implement the non-linear method for triangulation (optional task). Please\n"
-        "\trefer to 'Tutorial_NonlinearLeastSquares/main.cpp' for an example and some explanations.\n\n"
-        "\tIn your final submission, please\n"
-        "\t    - delete ALL unrelated test or debug code and avoid unnecessary output.\n"
-        "\t    - include all the source code (and please do NOT modify the structure of the directories).\n"
-        "\t    - do NOT include the 'build' directory (which contains the intermediate files in a build step).\n"
-        "\t    - make sure your code compiles and can reproduce your results without ANY modification.\n\n" << std::flush;
-
-    /// Below are a few examples showing some useful data structures and APIs.
-
-    /// define a 2D vector/point
-    Vector2D b(1.1, 2.2);
-
-    /// define a 3D vector/point
-    Vector3D a(1.1, 2.2, 3.3);
-
-    /// get the Cartesian coordinates of a (a is treated as Homogeneous coordinates)
-    Vector2D p = a.cartesian();
-
-    /// get the Homogeneous coordinates of p
-    Vector3D q = p.homogeneous();
-
-    /// define a 3 by 3 matrix (and all elements initialized to 0.0)
-    Matrix33 A;
-
-    /// define and initialize a 3 by 3 matrix
-    Matrix33 T1(1.1, 2.2, 3.3,
-        0, 2.2, 3.3,
-        0, 0, 1);
-
-    /// define and initialize a 3 by 4 matrix
-    Matrix34 M1(1.1, 2.2, 3.3, 0,
-        0, 2.2, 3.3, 1,
-        0, 0, 1, 1);
-
-    /// set first row by a vector
-    //M.set_row(0, Vector4D(1.1, 2.2, 3.3, 4.4));
-
-    /// set second column by a vector
-    //M.set_column(1, Vector3D(5.5, 5.5, 5.5));
-
-    /// define a 15 by 9 matrix (and all elements initialized to 0.0)
-    Matrix W(15, 9, 0.0);
-    /// set the first row by a 9-dimensional vector
-    W.set_row(0, { 0, 1, 2, 3, 4, 5, 6, 7, 8 }); // {....} is equivalent to a std::vector<double>
-
-    /// get the number of rows.
-    int num_rows = W.rows();
-
-    /// get the number of columns.
-    int num_cols = W.cols();
-
-    /// get the the element at row 1 and column 2
-    double value = W(1, 2);
-
-    /// get the last column of a matrix
-    Vector last_column = W.get_column(W.cols() - 1);
-
-    /// define a 3 by 3 identity matrix
-    Matrix33 I = Matrix::identity(3, 3, 1.0);
-
-    /// matrix-vector product
-    //Vector3D v = M * Vector4D(1, 2, 3, 4); // M is 3 by 4
-
-    ///For more functions of Matrix and Vector, please refer to 'matrix.h' and 'vector.h'
 
     // TODO: delete all above example code in your final submission
 
@@ -681,8 +616,12 @@ bool Triangulation::triangulation(
     auto rt = GEO1016_A2::getPossibleRt(E);
     Matrix34 M = GEO1016_A2::getProjectionMatrix(K, rt.possibleR[0], rt.possiblet[0]);
     Matrix34 M_ = GEO1016_A2::getProjectionMatrix(K, rt.possibleR[0], rt.possiblet[1]);
-
     auto points3d = GEO1016_A2::getTriangulatedPoints3D(M, M_, points_0, points_1);
+
+    debugger::PrintMatrix(K); std::cout << '\n';
+    M = GEO1016_A2::getProjectionMatrix(K, rt.I, rt.zero_t);
+    std::cout << "M for camera 1: \n";
+    debugger::PrintMatrix(M);
     // get relative pose -----------------------------------------------------------------------------
     
 
