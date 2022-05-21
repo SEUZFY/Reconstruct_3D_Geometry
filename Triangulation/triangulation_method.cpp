@@ -530,30 +530,23 @@ bool Triangulation::triangulation(
     Vector3D& t    /// output: 3D vector, which is the recovered translation of the 2nd camera
 ) const
 {
-    /// NOTE: there might be multiple workflows for reconstructing 3D geometry from corresponding image points.
-    ///       This assignment uses the commonly used one explained in our lecture.
-    ///       It is advised to define a function for the sub-tasks. This way you have a clean and well-structured
-    ///       implementation, which also makes testing and debugging easier. You can put your other functions above
-    ///       triangulation(), or put them in one or multiple separate files.
+    /*
+    * function implementations are all above triangulation()
+    */
 
 
-    // TODO: delete all above example code in your final submission
 
-    //--------------------------------------------------------------------------------------------------------------
-    // implementation starts ...
+    /* ----------------------------------------------------------------------------------------------*/
 
-    // TODO: check if the input is valid (always good because you never known how others will call your function).
+
+
+    /* check if the input is valid ------------------------------------------------------------------*/
     auto valid = GEO1016_A2::isInputValid(points_0, points_1);
     if (!valid)return false;
 
-    // TODO: Estimate relative pose of two views. This can be subdivided into
-    //      - estimate the fundamental matrix F;
-    //      - compute the essential matrix E;
-    //      - recover rotation R and t.
 
 
-
-    // get transform matrix --------------------------------------------------------------------------
+    /* get transform matrix--------------------------------------------------------------------------*/
     auto trans_0 = GEO1016_A2::getNormalizeTransformMatrix(points_0);
     auto trans_1 = GEO1016_A2::getNormalizeTransformMatrix(points_1);
     if (trans_0.second == false || trans_1.second == false)
@@ -563,7 +556,7 @@ bool Triangulation::triangulation(
         return false;
     }
     Matrix33 T = trans_0.first; Matrix33 T_ = trans_1.first;
-    // get transform matrix --------------------------------------------------------------------------
+    /* get transform matrix--------------------------------------------------------------------------*/
 
 
 
