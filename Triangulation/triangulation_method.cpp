@@ -436,7 +436,8 @@ namespace GEO1016_A2 {
     * get 3D points from triangulation
     * 
     * @param:
-    * M - projection matrix
+    * M -  projection matrix for image_0 (World CRS)
+    * M_ - projection matrix for image_1
     * points_0 - 2D points in image_0
     * points_1 - 2D points in image_1
     * 
@@ -445,6 +446,7 @@ namespace GEO1016_A2 {
     */
     std::vector<Vector3D> getTriangulatedPoints3D(
         const Matrix34& M,
+        const Matrix34& M_,
         const std::vector<Vector2D>& points_0,
         const std::vector<Vector2D>& points_1)
     {
@@ -460,11 +462,20 @@ namespace GEO1016_A2 {
         // M3
         Vector4D M3(M(2, 0), M(2, 1), M(2, 2), M(2, 3));
 
-        debugger::PrintMatrix(M);
-        std::cout << '\n';
-        debugger::PrintVector(M1);
-        debugger::PrintVector(M2);
-        debugger::PrintVector(M3);
+        // loop through each correspondence
+        for (int i = 0; i != points_0.size(); ++i)
+        {
+            // construct matrix A:
+            //  xM3  - M1
+            //  yM3  - M2
+            // x'M3' - M1'
+            // y'M3' - M2'
+
+        }
+        Vector4D a(1, 1, 1, 1);
+        Vector4D b(2, 2, 2, 2);
+        Vector4D c = 5 * a - b;
+        debugger::PrintVector(c);
 
         return points_3d;
 
@@ -647,7 +658,7 @@ bool Triangulation::triangulation(
     // get relative pose -----------------------------------------------------------------------------
     auto rt = GEO1016_A2::getPossibleRt(E);
     Matrix34 M = GEO1016_A2::getProjectionMatrix(K, rt.possibleR[0], rt.possiblet[0]);
-    auto points3d = GEO1016_A2::getTriangulatedPoints3D(M, points_0, points_1);
+    //auto points3d = GEO1016_A2::getTriangulatedPoints3D(M, points_0, points_1);
     // get relative pose -----------------------------------------------------------------------------
     
 
