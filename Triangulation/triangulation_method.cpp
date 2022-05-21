@@ -452,7 +452,7 @@ namespace GEO1016_A2 {
     {
         std::vector<Vector3D> points_3d;  // element will be returned
 
-        // define M1, M2, M3 - each row in M
+        // define M1, M2, M3 - each row in M -----------------------------------------------
         // M1
         Vector4D M1(M(0, 0), M(0, 1), M(0, 2), M(0, 3));
         // M2
@@ -460,7 +460,7 @@ namespace GEO1016_A2 {
         // M3
         Vector4D M3(M(2, 0), M(2, 1), M(2, 2), M(2, 3));
 
-        // define M1_, M2_, M3_ - each row in M_
+        // define M1_, M2_, M3_ - each row in M_ -------------------------------------------
         // M1_
         Vector4D M1_(M_(0, 0), M_(0, 1), M_(0, 2), M_(0, 3));
         // M2_
@@ -468,14 +468,7 @@ namespace GEO1016_A2 {
         // M3_
         Vector4D M3_(M_(2, 0), M_(2, 1), M_(2, 2), M_(2, 3));
 
-        debugger::PrintMatrix(M_);
-        std::cout << '\n';
-        debugger::PrintVector(M1_);
-        debugger::PrintVector(M2_);
-        debugger::PrintVector(M3_);
-
-
-        // loop through each correspondence
+        // loop through each correspondence ------------------------------------------------
         for (int i = 0; i != points_0.size(); ++i)
         {
             // construct matrix A:
@@ -483,6 +476,7 @@ namespace GEO1016_A2 {
             //  yM3  - M2
             // x'M3' - M1'
             // y'M3' - M2'
+
 
         }
         Vector4D a(1, 1, 1, 1);
