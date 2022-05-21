@@ -30,11 +30,10 @@
 using namespace easy3d;
 
 namespace debugger {
-    void PrintMatrix33(const Matrix33& M)
+    void PrintVector(const Vector& v)
     {
-        std::cout << M(0, 0) << "," << M(0, 1) << "," << M(0, 2) << '\n';
-        std::cout << M(1, 0) << "," << M(1, 1) << "," << M(1, 2) << '\n';
-        std::cout << M(2, 0) << "," << M(2, 1) << "," << M(2, 2) << '\n';
+        for (std::size_t i = 0; i != v.size(); ++i)std::cout << v[i] << " ";
+        std::cout << '\n';
     }
 
     void PrintPoints(const std::vector<Vector2D>& points)
@@ -387,8 +386,15 @@ namespace GEO1016_A2 {
         rt.possibleR.emplace_back();
         rt.possibleR.back() = determinant(U * W.transpose() * V.transpose()) * U * W.transpose() * V.transpose();
 
-        return rt;
+        // get possible t (1)
+        rt.possiblet.emplace_back();
+        rt.possiblet.back() = U.get_column(U.cols() - 1);
 
+        // get possible t (2)
+        rt.possiblet.emplace_back(); 
+        rt.possiblet.back() = -U.get_column(U.cols() - 1);
+
+        return rt;
     }
     
 }
