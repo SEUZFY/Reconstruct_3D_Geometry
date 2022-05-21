@@ -510,10 +510,10 @@ namespace GEO1016_A2 {
     * and the triangulated 3d points
     */
     struct Result {
-        Matrix33 res_R;
-        Vector3D res_t;
-        std::vector<Vector3D> res_points;
-        Result(std::size_t size = 160) { res_points.reserve(size); }
+        Matrix33 R;
+        Vector3D t;
+        std::vector<Vector3D> points;
+        Result(std::size_t size = 160) { points.reserve(size); }
     };
 
     /*
@@ -525,17 +525,16 @@ namespace GEO1016_A2 {
     * points_1 - 2d points for image_1
     * 
     * @return:
-    * std::pair<Matrix33, Vector3D> - result R and t
+    * result R and t and recovered 3d points
     */
-    std::pair<Matrix33, Vector3D> getRelativePose(
+    Result getRelativePose(
         const Matrix33& E,
         const Matrix33& K,
         const std::vector<Vector2D>& points_0,
         const std::vector<Vector2D>& points_1)
     {
         // elements will be returned
-        Matrix33 result_R;
-        Vector3D result_t;
+        Result res;  // if points size is not 160, use: Result res(points_size) instead;
 
 
         // mark which R,t combination is the best estimation
@@ -545,7 +544,7 @@ namespace GEO1016_A2 {
         // find possible rt
         auto rt = getPossibleRt(E);
 
-        // variables help to estimate the combinations -------------------------
+        // variables help to estimate the combinations -------------------------------
         Matrix33 R;
         Vector3D t;
 
@@ -558,21 +557,19 @@ namespace GEO1016_A2 {
 
         Matrix34 M = getProjectionMatrix(K, I, zero_t);  // projection matrix for image_0
         Matrix34 M_;  // projection matrix for image_1, 4 possibilities
-        std::vector<Vector3D> pts_3d;  // store the estimated 3d points
-        pts_3d.reserve(points_0.size());
-        // variables help to estimate the combinations -------------------------
+        // variables help to estimate the combinations -------------------------------
         
 
         // combination R:0, t:1 ------------------------------------------------------
         M_ = getProjectionMatrix(K, rt.possibleR[0], rt.possiblet[1]);
-        std::cout << "size: " << pts_3d.size() << '\n';
-        pts_3d = getTriangulatedPoints3D(M, M_, points_0, points_1);
-        std::cout << "size: " << pts_3d.size() << '\n';
-        pts_3d.clear();
-        std::cout << "size: " << pts_3d.size() << '\n';
+        std::cout << "size: " << res.points.size() << '\n';
+        res.points = getTriangulatedPoints3D(M, M_, points_0, points_1);
+        std::cout << "size: " << res.points.size() << '\n';
+        res.points.clear();
+        std::cout << "size: " << res.points.size() << '\n';
 
         // return results
-        return std::make_pair(result_R, result_t);
+        return res;
     }
 }
 
