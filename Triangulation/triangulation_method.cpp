@@ -410,8 +410,25 @@ namespace GEO1016_A2 {
     * for image_0, R, t - 4 different combinations
     * 
     * @param:
+    * K - intrinsic matrix - 3 by 3
+    * R - rotation matrix - 3 by 3
+    * t - translation vector - 3d vector
     * 
+    * @return:
+    * projection Matrix corresponding R and t - 3 by 4 matrix
     */
+    Matrix34 getProjectionMatrix(
+        const Matrix33& K,
+        const Matrix33& R,
+        const Vector3D& t)
+    {
+        Matrix34 rt_matrix(
+            R(0, 0), R(0, 1), R(0, 2), t[0],
+            R(1, 0), R(1, 1), R(1, 2), t[1],
+            R(2, 0), R(2, 1), R(2, 2), t[2]
+        );
+        return K * rt_matrix;
+    }
     
 }
 
@@ -589,7 +606,8 @@ bool Triangulation::triangulation(
 
     // get relative pose -----------------------------------------------------------------------------
     auto rt = GEO1016_A2::getPossibleRt(E);
-    //auto point_3d = GEO1016_A2::getPoint3D(points_0, M1);
+    Matrix34 M = GEO1016_A2::getProjectionMatrix(K, rt.possibleR[0], rt.possiblet[0]);
+    debugger::PrintMatrix(M);
     // get relative pose -----------------------------------------------------------------------------
     
 
