@@ -1,3 +1,57 @@
 # Reconstruct_3D_Geometry
 
-Under construction.
+Project for 3D Geometry Reconstruction based on the open-source project - [Easy3D](
+https://github.com/LiangliangNan/Easy3D).
+
+<img width="479" alt="triangulation_withwindow" src="https://user-images.githubusercontent.com/72781910/169665465-5a8e8be5-1c91-42e9-96a9-8f82470c0fd3.PNG">
+
+**Easy3D** is a lightweight, easy-to-use, and efficient open-source C++ library for processing and rendering 3D data. **IF YOU WANT TO USE IT** please be aware of the following information:
+
+**COPYRIGHT**:
+
+Copyright (C) 2015 Liangliang Nan <liangliang.nan@gmail.com>
+
+https://3d.bk.tudelft.nl/liangliang/
+
+
+**CITATION INFO**:
+```
+@article{easy3d2021,
+  title = {Easy3{D}: a lightweight, easy-to-use, and efficient {C}++ library for processing and rendering 3{D} data},
+  author = {Liangliang Nan},
+  journal = {Journal of Open Source Software}，
+  year = {2021},
+  volume = {6},
+  number = {64},
+  pages = {3255},
+  doi = {10.21105/joss.03255},
+  url = {https://doi.org/10.21105/joss.03255}
+}
+```
+More info about **Easy3D** please refer to: https://github.com/LiangliangNan/Easy3D.
+
+# HOW TO USE
+
+* Clone this project at: https://github.com/SEUZFY/Reconstruct_3D_Geometry.git
+
+* Or download the code and open the [CMakeLists.txt](https://github.com/SEUZFY/Reconstruct_3D_Geometry/blob/master/CMakeLists.txt) file in an IDE.
+
+Build and run this project, a viewer should pop up automatically, press `space` and the reconstructed model is shown.
+
+**Note**: 
+
+After 3d reconstruction, move the mouse and the model can be seen from different positions using zoom in/out
+
+<img width="479" alt="triangulation_zoomout" src="https://user-images.githubusercontent.com/72781910/169665568-fb417f54-f026-4eb9-933a-b598d5392911.png">
+
+Meanwhile some helpful information should be printed to the console.
+
+# GOOD TO KNOW
+
+* The calibration method is described in **details** [here](https://github.com/SEUZFY/Camera_Calibration/blob/master/Calibration_method_explanation/camera_calibration.pdf). **IT SHOULD BE NOTED** that this explanation comes from the course notes, if you want to use it in a scientific work, you are kindly asked to mention the **ORIGINAL** author: 
+  
+  < Liangliang Nan <liangliang.nan@gmail.com> >
+  
+  < https://3d.bk.tudelft.nl/liangliang/ > 
+
+* The calibration implementation is [here](https://github.com/SEUZFY/Reconstruct_3D_Geometry/blob/master/Triangulation/triangulation_method.cpp), all the other files are kindly given by [Liang Liang](https://3d.bk.tudelft.nl/liangliang/).
