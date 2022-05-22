@@ -231,7 +231,7 @@ namespace GEO1016_A2 {
         double u{}, v{}, u_{}, v_{};
         for (int i = 0; i != normal_points_0.size(); ++i)
         {
-            u = normal_points_0[i].x(); v = normal_points_0[i].y();
+            u  = normal_points_0[i].x(); v  = normal_points_0[i].y();
             u_ = normal_points_1[i].x(); v_ = normal_points_1[i].y();
             W.set_row(i, { u * u_, v * u_, u_, u * v_, v * v_, v_, u, v, 1 });
         }
