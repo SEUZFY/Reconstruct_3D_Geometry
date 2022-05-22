@@ -3,7 +3,7 @@
 Project for 3D Geometry Reconstruction based on the open-source project - [Easy3D](
 https://github.com/LiangliangNan/Easy3D).
 
-![Vizard](https://user-images.githubusercontent.com/72781910/169711591-afb5537e-6354-4693-b3f8-f257dd0f84f1.gif)
+![Vizard](https://user-images.githubusercontent.com/72781910/169712755-63a56683-a056-4710-bf54-12c3511638a7.gif)
 
 **Easy3D** is a lightweight, easy-to-use, and efficient open-source C++ library for processing and rendering 3D data. **IF YOU WANT TO USE IT** please be aware of the following information:
 
