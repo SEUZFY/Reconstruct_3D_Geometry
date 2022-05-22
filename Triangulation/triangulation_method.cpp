@@ -27,8 +27,12 @@
 #include <easy3d/optimizer/optimizer_lm.h>
 
 
+
 using namespace easy3d;
 
+
+
+/* helpful for debugging, remove later -------------------------------------------------------------*/
 namespace debugger {
     void PrintVector(const Vector& v)
     {
@@ -63,6 +67,9 @@ namespace debugger {
 
 }
 
+
+
+/* implementations ---------------------------------------------------------------------------------*/
 namespace GEO1016_A2 {
     /*
     * if the input is valid
@@ -462,21 +469,15 @@ namespace GEO1016_A2 {
         std::vector<Vector3D> points_3d;  // element will be returned
         points_3d.reserve(points_0.size());
 
-        // define M1, M2, M3 - each row in M -----------------------------------------------
-        // M1
-        Vector4D M1(M(0, 0), M(0, 1), M(0, 2), M(0, 3));
-        // M2
-        Vector4D M2(M(1, 0), M(1, 1), M(1, 2), M(1, 3));
-        // M3
-        Vector4D M3(M(2, 0), M(2, 1), M(2, 2), M(2, 3));
+        // define M1, M2, M3 - each row in M -----------------------------------------------       
+        Vector4D M1(M(0, 0), M(0, 1), M(0, 2), M(0, 3));  // M1     
+        Vector4D M2(M(1, 0), M(1, 1), M(1, 2), M(1, 3));  // M2      
+        Vector4D M3(M(2, 0), M(2, 1), M(2, 2), M(2, 3));  // M3
 
-        // define M1_, M2_, M3_ - each row in M_ -------------------------------------------
-        // M1_
-        Vector4D M1_(M_(0, 0), M_(0, 1), M_(0, 2), M_(0, 3));
-        // M2_
-        Vector4D M2_(M_(1, 0), M_(1, 1), M_(1, 2), M_(1, 3));
-        // M3_
-        Vector4D M3_(M_(2, 0), M_(2, 1), M_(2, 2), M_(2, 3));
+        // define M1_, M2_, M3_ - each row in M_ ------------------------------------------- 
+        Vector4D M1_(M_(0, 0), M_(0, 1), M_(0, 2), M_(0, 3));  // M1_ 
+        Vector4D M2_(M_(1, 0), M_(1, 1), M_(1, 2), M_(1, 3));  // M2_
+        Vector4D M3_(M_(2, 0), M_(2, 1), M_(2, 2), M_(2, 3));  // M3_
 
         // loop through each correspondence ------------------------------------------------
         for (std::size_t i = 0; i != points_0.size(); ++i)
@@ -587,11 +588,12 @@ namespace GEO1016_A2 {
         // variables help to estimate the combinations -----------------------------------------------
         
         
-        // define Lambda: getCount
-        // because the following code is (basically) the same for 4 different R, t combinations
-        // use Lambda to avoid repetition
-        // @changeable params:
-        //  p_r - index of rt.possibleR, p_t - index of rt.possiblet, i - index of count array --------
+        /* 
+        * define Lambda: getCount
+        * because the following code is (basically) the same for 4 different R, t combinations
+        * use Lambda to avoid repetition
+        * @changeable params:
+        * p_r - index of rt.possibleR, p_t - index of rt.possiblet, i - index of count array -------*/      
         auto getCount = [&](
             int p_r, int p_t, int i,
             const Rt& rt, const Matrix33& K, const Matrix& M,  // read - only
@@ -614,28 +616,22 @@ namespace GEO1016_A2 {
                 res.points3D.clear();  // for next use
             }
         };
-        // Lambda definition 1 -----------------------------------------------------------------------
+        /* Lambda definition 1 ---------------------------------------------------------------------*/
         
 
-        // four different R, t combinations ----------------------------------------------------------
-        // combination R:0, t:0, write result to count[0]
-        getCount(0, 0, 0, rt, K, M, res, count);
-
-        // combination R:0, t:1, write result to count[1]
-        getCount(0, 1, 1, rt, K, M, res, count);
-        
-        // combination R:1, t:0, write result to count[2]
-        getCount(1, 0, 2, rt, K, M, res, count);
-        
-        // combination R:1, t:1, write result to count[3]
-        getCount(1, 1, 3, rt, K, M, res, count);
+        // four different R, t combinations ----------------------------------------------------------       
+        getCount(0, 0, 0, rt, K, M, res, count);  // combination R:0, t:0, write result to count[0]       
+        getCount(0, 1, 1, rt, K, M, res, count);  // combination R:0, t:1, write result to count[1]
+        getCount(1, 0, 2, rt, K, M, res, count);  // combination R:1, t:0, write result to count[2]
+        getCount(1, 1, 3, rt, K, M, res, count);  // combination R:1, t:1, write result to count[3]
         // four different R, t combinations ----------------------------------------------------------
 
 
-        // define Lambda function: verify 
-        // number of positive z values in two camera CRS, need to be considered equal to points size
-        // @changeable param:
-        //  i - index of count array -----------------------------------------------------------------
+        /* define Lambda function : verify
+        * number of positive z values in two camera CRS, need to be considered equal to points size
+        * @changeable param:
+        * i - index of count array -------------------------------------------------------------------
+        */
         auto verify = [&](
             int i, std::pair<std::size_t, std::size_t>(&count)[4]) ->bool
         {
@@ -643,7 +639,7 @@ namespace GEO1016_A2 {
             const double eps = 1e-3;  // due to possible noisy points, eps can be set larger
             return ((count[i].first - n < eps) && (count[i].second - n < eps));
         };
-        // Lambda definition 2 -----------------------------------------------------------------------
+        /* Lambda definition 2 ---------------------------------------------------------------------*/
 
 
         // find best R, t combination ----------------------------------------------------------------
