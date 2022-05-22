@@ -504,7 +504,6 @@ namespace GEO1016_A2 {
     }
     
 
-
     /*
     * struct to store the result R, t
     * and the triangulated 3d points
