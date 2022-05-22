@@ -79,13 +79,15 @@ namespace GEO1016_A2 {
     */
     bool isInputValid(const std::vector<Vector2D>& points_0, const std::vector<Vector2D>& points_1)
     {
-        if (points_0.size() < 8 || points_1.size() < 8)  // at least 8 correspondences
+        /* at least 8 correspondences */
+        if (points_0.size() < 8 || points_1.size() < 8)
         {
             LOG(ERROR) << "insufficient correspondences\n";
             return false;
         }
 
-        if (points_0.size() != points_1.size())  // size doesn't match
+        /* sizes don't match */
+        if (points_0.size() != points_1.size())
         {
             LOG(ERROR) << "point size MUST match\n";
             return false;
@@ -121,31 +123,32 @@ namespace GEO1016_A2 {
     std::pair<Matrix33, bool> getNormalizeTransformMatrix(
         const std::vector<Vector2D>& points)
     {
-        // elements will be returned
+        /* elements will be returned */
         Matrix33 T;
         bool T_valid = false;
 
-        // transform matrix --------------------------------------------------------------
-        double sumX = 0;  // for calculating image's center
+
+        /* get transform matrix --------------------------------------------------------------------*/
+        double sumX = 0;  /* for calculating image's center */
         double sumY = 0;
-        const double N = static_cast<double>(points.size());  // here N is guaranteed to be larger than 0(ifInputValid() gets executed first)
+        const double N = static_cast<double>(points.size());  /* here N is guaranteed to be larger than 0(ifInputValid() gets executed first) */
 
         for (const auto& p : points)
         {
             sumX += p.x();
             sumY += p.y();
         }
-        if (sumX < 1e-8 || sumY < 1e-8)  // sumX or sumY is considered equal to 0
+        if (sumX < 1e-8 || sumY < 1e-8)  /* sumX or sumY is considered equal to 0 */
         {
             LOG(ERROR) << "please check the divisor for x and y coordinates\n";
-            return std::make_pair(T, T_valid);  // T_valid remains false, will not trigger further process
+            return std::make_pair(T, T_valid);  /* T_valid remains false, will not trigger further process */
         }
 
-        // image center: (tx, ty)
+        /* image center : (tx, ty) */
         double tx = sumX / N;
         double ty = sumY / N;
 
-        // scale factor
+        /* scale factor */
         double sum_dist = 0;
         for (const auto& p : points)
             sum_dist += sqrt((p.x() - tx) * (p.x() - tx) + (p.y() - ty) * (p.y() - ty));
@@ -153,16 +156,16 @@ namespace GEO1016_A2 {
         if (avg_dc < 1e-8)
         {
             LOG(ERROR) << "please check the average distance to the origin\n";
-            return std::make_pair(T, T_valid);  // T_valid remains false, will not trigger further process
+            return std::make_pair(T, T_valid);  /* T_valid remains false, will not trigger further process */
         }
-        double s = sqrt(2) / avg_dc;  // scale factor
+        double s = sqrt(2) / avg_dc;
 
-        // construct the transform matrix for image_0, set the T0_flag to true
+        /* construct the transform matrix for image_0, set the T0_flag to true */
         T.set_row(0, { s, 0, -s * tx });
         T.set_row(1, { 0, s, -s * ty });
         T.set_row(2, { 0, 0, 1 });
-        T_valid = true;  // T is successfully constructed
-        // transform matrix --------------------------------------------------------------
+        T_valid = true;  /* T is successfully constructed */
+        /* get transform matrix --------------------------------------------------------------------*/
 
         return std::make_pair(T, T_valid);
     }
