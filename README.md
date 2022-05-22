@@ -43,7 +43,10 @@ Build and run this project, a viewer should pop up automatically, press `space` 
 
 After 3d reconstruction, move the mouse and the model can be seen from different positions using zoom in/out
 
-<img width="480" alt="triangulation_zoomout_withwindow" src="https://user-images.githubusercontent.com/72781910/169691743-fa836ec5-dee1-4947-9707-d12a012e9f61.png">
+<p float="left">
+  <img width="320" alt="triangulation_withwindow" src="https://user-images.githubusercontent.com/72781910/169711724-cd59f57a-bbb5-473d-a6f1-98b47df225ba.PNG">
+  <img width="320" alt="triangulation_zoomout_withwindow" src="https://user-images.githubusercontent.com/72781910/169691743-fa836ec5-dee1-4947-9707-d12a012e9f61.png">
+</p>
 
 Meanwhile some helpful information should be printed to the console.
 
