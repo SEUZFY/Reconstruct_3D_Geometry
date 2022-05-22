@@ -13,7 +13,6 @@ Copyright (C) 2015 Liangliang Nan <liangliang.nan@gmail.com>
 
 https://3d.bk.tudelft.nl/liangliang/
 
-<img src="https://media3.giphy.com/media/aUovxH8Vf9qDu/giphy.gif"/>
 
 **CITATION INFO**:
 ```
