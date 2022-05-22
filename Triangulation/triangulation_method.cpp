@@ -730,10 +730,19 @@ namespace GEO1016_A2 {
         {
             Vector3D p3D  = M * p.homogeneous();
             Vector2D p2D  = p3D.cartesian();
-            std::cout << p2D.x() << ", " << p2D.y() << '\n';
+            //std::cout << p2D.x() << ", " << p2D.y() << '\n';
         }
         // image_0 -----------------------------------------------------------------------------------
 
+
+        // image_1 -----------------------------------------------------------------------------------
+        for (const auto& p : points_3d)
+        {
+            Vector3D p3D = M_ * p.homogeneous();
+            Vector2D p2D = p3D.cartesian();
+            std::cout << p2D.x() << ", " << p2D.y() << '\n';
+        }
+        // image_1 -----------------------------------------------------------------------------------
         return std::make_pair(0, 0);
     }
 }
