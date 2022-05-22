@@ -48,13 +48,15 @@ Meanwhile some helpful information should be printed to the console.
 
 # GOOD TO KNOW
 
-* The calibration method is described in **details** [here](https://github.com/SEUZFY/Camera_Calibration/blob/master/Calibration_method_explanation/camera_calibration.pdf). **IT SHOULD BE NOTED** that this explanation comes from the course notes, if you want to use it in a scientific work, you are kindly asked to mention the **ORIGINAL** author: 
+* The calibration method is described in **details** [here](https://3d.bk.tudelft.nl/courses/geo1016/handouts/04-reconstruct_3D_geometry.pdf) and [here](https://3d.bk.tudelft.nl/courses/geo1016/handouts/03-epipolar_geometry.pdf). **IT SHOULD BE NOTED** that this explanation comes from the course notes, if you want to use it in a scientific work, you are kindly asked to mention the **ORIGINAL** author: 
   
   < Liangliang Nan <liangliang.nan@gmail.com> >
   
   < https://3d.bk.tudelft.nl/liangliang/ > 
 
-* The calibration implementation is [here](https://github.com/SEUZFY/Reconstruct_3D_Geometry/blob/master/Triangulation/triangulation_method.cpp), all the other files are kindly given by [Liang Liang](https://3d.bk.tudelft.nl/liangliang/).
+* The `triangulation implementation` is [here](https://github.com/SEUZFY/Reconstruct_3D_Geometry/blob/master/Triangulation/triangulation_method.cpp), all the other files are kindly given by [Liang Liang](https://3d.bk.tudelft.nl/liangliang/).
+
+* The `workflow` is illustrated with some code examples [here](https://github.com/SEUZFY/Reconstruct_3D_Geometry/blob/master/Triangulation_materials/3DGeometry_from_2images_workflow.pdf).
 
 # Evaluation
 
