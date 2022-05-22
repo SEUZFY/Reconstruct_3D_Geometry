@@ -193,9 +193,10 @@ namespace GEO1016_A2 {
 
         // normalize points
         for (const auto& p : points)
-        {
+        {           
             Vector3D q = T * p.homogeneous();  // normalize points: q = T*p
-            np.push_back(q.cartesian());  // add the normalized 2d coordinates to the result vector
+            np.emplace_back();
+            np.back() = q.cartesian();  // add the normalized 2d coordinates to the result vector
         }
 
         return np;
