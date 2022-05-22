@@ -13,7 +13,6 @@ Copyright (C) 2015 Liangliang Nan <liangliang.nan@gmail.com>
 
 https://3d.bk.tudelft.nl/liangliang/
 
-
 **CITATION INFO**:
 ```
 @article{easy3d2021,
@@ -28,6 +27,7 @@ https://3d.bk.tudelft.nl/liangliang/
   url = {https://doi.org/10.21105/joss.03255}
 }
 ```
+
 More info about **Easy3D** please refer to: https://github.com/LiangliangNan/Easy3D.
 
 # HOW TO USE
@@ -42,7 +42,7 @@ Build and run this project, a viewer should pop up automatically, press `space` 
 
 After 3d reconstruction, move the mouse and the model can be seen from different positions using zoom in/out
 
-<img width="479" alt="triangulation_zoomout" src="https://user-images.githubusercontent.com/72781910/169665568-fb417f54-f026-4eb9-933a-b598d5392911.png">
+<img width="480" alt="triangulation_zoomout_withwindow" src="https://user-images.githubusercontent.com/72781910/169691743-fa836ec5-dee1-4947-9707-d12a012e9f61.png">
 
 Meanwhile some helpful information should be printed to the console.
 
@@ -56,6 +56,15 @@ Meanwhile some helpful information should be printed to the console.
 
 * The calibration implementation is [here](https://github.com/SEUZFY/Reconstruct_3D_Geometry/blob/master/Triangulation/triangulation_method.cpp), all the other files are kindly given by [Liang Liang](https://3d.bk.tudelft.nl/liangliang/).
 
-# NEED TO FINISH
+# Evaluation
 
-* evaluation - variance
+**Method**:
+
+$\frac{\sum \sqrt{\left ( \Delta x \right )^2 + \left ( \Delta y \right )^2}}{N(points)}$
+
+average difference for image 0 `(points_0)` is:
+`1.04006`
+
+average difference for image 1 `(points_1)` is:
+`0.912123`
+
