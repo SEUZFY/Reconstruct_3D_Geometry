@@ -88,6 +88,7 @@ namespace GEO1016_A2 {
     }
 
 
+
     /*
     * construct transform matrix for normalization
     * explanation:
@@ -160,6 +161,7 @@ namespace GEO1016_A2 {
     }
 
 
+
     /*
     * NormalizePoints
     * apply transform matrix to 2D points
@@ -188,6 +190,7 @@ namespace GEO1016_A2 {
 
         return np;
     }
+
 
 
     /*
@@ -241,6 +244,7 @@ namespace GEO1016_A2 {
 
         return std::make_pair(F, F_valid);
     }
+
 
 
     /*
@@ -305,6 +309,7 @@ namespace GEO1016_A2 {
     }
 
 
+
     /*
     * get intrinsicK matrix
     * assume skewness is 0
@@ -317,6 +322,7 @@ namespace GEO1016_A2 {
             0, 0, 1
         );
     }
+
 
 
     /*
@@ -341,6 +347,7 @@ namespace GEO1016_A2 {
     {
         return K.transpose() * F * K;
     }
+
 
 
     /*
@@ -402,6 +409,7 @@ namespace GEO1016_A2 {
     }
 
 
+
     /*
     * getProjectionMatrix
     * p = MP
@@ -429,6 +437,7 @@ namespace GEO1016_A2 {
         );
         return K * rt_matrix;
     }
+
 
 
     /*
@@ -503,6 +512,7 @@ namespace GEO1016_A2 {
         return points_3d;
     }
     
+
 
     /*
     * struct to store the result R, t
@@ -672,6 +682,60 @@ namespace GEO1016_A2 {
         return res;
     }
 
+
+
+    /*
+    * Evaluate: re-project recovered 3d points back to image plane
+    * calculate the variances for image_0 and image_1
+    * 
+    * @param:
+    * K - intrinsic matrix
+    * R - Rotation matrix
+    * t - translation vector
+    * points_3d - recovered 3d points in World CRS (camera_0 CRS)
+    * points_0  - known 2d points for image_0 (camera_0: World CRS)
+    * points_1  - known 2d points for image_1 (camera_1: Relative CRS)
+    * from camera_0(P) to camera_1(Q):
+    * Q = R * P + t
+    * 
+    * @return:
+    * std::pair<double, double> - first is the variance of image_0, second is of image_1
+    */
+    std::pair<double, double> Evaluate(
+        const Matrix33& K,
+        const Matrix33& R,
+        const Vector3D& t,
+        const std::vector<Vector3D>& points_3d,
+        const std::vector<Vector2D>& points_0,
+        const std::vector<Vector2D>& points_1)
+    {
+        // define identity matrix
+        Matrix33 I(
+            1, 0, 0,
+            0, 1, 0,
+            0, 0, 1
+        );
+
+        // define 0 translation vector
+        Vector3D zero_t(0.0, 0.0, 0.0);
+
+        // projection matrix for camera_0 (image_0)
+        Matrix34 M = getProjectionMatrix(K, I, zero_t);
+
+        // projection matrix for camera_1 (image_1)
+        Matrix34 M_ = getProjectionMatrix(K, R, t);
+
+        // image_0 -----------------------------------------------------------------------------------
+        for (const auto& p : points_3d) 
+        {
+            Vector3D p3D  = M * p.homogeneous();
+            Vector2D p2D  = p3D.cartesian();
+            std::cout << p2D.x() << ", " << p2D.y() << '\n';
+        }
+        // image_0 -----------------------------------------------------------------------------------
+
+        return std::make_pair(0, 0);
+    }
 }
 
 /**
@@ -772,6 +836,12 @@ bool Triangulation::triangulation(
     points_3d = res.points3D;
     /* get relative pose ----------------------------------------------------------------------------*/
     
+
+
+    /* evaluate ------------------------------------------------*/
+    auto var = GEO1016_A2::Evaluate(K, R, t, points_3d, points_0, points_1);
+    /* evaluate ------------------------------------------------*/
+
 
 
     /* if no res found, res.points3D remains 0, will not trigger the update of viewer ---------------*/
