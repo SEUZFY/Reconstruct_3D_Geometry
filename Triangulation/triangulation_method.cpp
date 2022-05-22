@@ -734,7 +734,7 @@ namespace GEO1016_A2 {
             for (std::size_t i = 0; i != points_3D.size(); ++i)
             {
                 // re-project 3D point to 2D
-                Vector3D p3D = M * points_3D[i].homogeneous();
+                Vector3D p3D = M_projection * points_3D[i].homogeneous();
                 Vector2D p2D = p3D.cartesian();
                 
                 // compare the difference
@@ -757,6 +757,8 @@ namespace GEO1016_A2 {
         return std::make_pair(diff_0, diff_1);
     }
 }
+
+
 
 /**
  * TODO: Finish this function for reconstructing 3D geometry from corresponding image points.
