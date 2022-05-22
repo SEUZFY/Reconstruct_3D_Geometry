@@ -623,41 +623,55 @@ namespace GEO1016_A2 {
         // four different R, t combinations ----------------------------------------------------------
 
 
-        // define Lambda function: getResult
-        // because the following code is the same for 4 different R, t combinations
+        // define Lambda function: verify 
+        // number of positive z values in two camera CRS, need to be considered equal to points size
         // @changeable param:
         //  i - index of count array -----------------------------------------------------------------
-        auto getResult = [&](
-            int i,
-            const Rt& rt, const Matrix33& K, const Matrix& M,  // read - only
-            Result& res, std::pair<std::size_t, std::size_t>(&count)[4])
+        auto verify = [&](
+            int i, std::pair<std::size_t, std::size_t>(&count)[4]) ->bool
         {
-
+            std::size_t n = points_0.size();
+            const double eps = 1e-3;  // due to possible noisy points, eps can be set larger
+            return ((count[i].first - n < eps) && (count[i].second - n < eps));
         };
         // Lambda definition 2 -----------------------------------------------------------------------
 
-        //debugger::PrintMatrix(res.R); debugger::PrintVector(res.t);
-        //std::cout << res.points3D.size() << '\n';
 
-        //std::cout << count[0].first << " " << count[0].second << '\n';
-        //std::cout << count[1].first << " " << count[1].second << '\n';
-        //std::cout << count[2].first << " " << count[2].second << '\n';
-        //std::cout << count[3].first << " " << count[3].second << '\n';
+        // find best R, t combination ----------------------------------------------------------------
+        if (verify(0, count))  // R:0, t:0
+        {
+            res.R = rt.possibleR[0];
+            res.t = rt.possiblet[0];
+            M_ = getProjectionMatrix(K, res.R, res.t);
+            res.points3D = getTriangulatedPoints3D(M, M_, points_0, points_1);
+        }
+        else if (verify(1, count))  // R:0, t:1
+        {
+            res.R = rt.possibleR[0];
+            res.t = rt.possiblet[1];
+            M_ = getProjectionMatrix(K, res.R, res.t);
+            res.points3D = getTriangulatedPoints3D(M, M_, points_0, points_1);
+        }       
+        else if (verify(2, count))  // R:1, t:0
+        {
+            res.R = rt.possibleR[1];
+            res.t = rt.possiblet[0];
+            M_ = getProjectionMatrix(K, res.R, res.t);
+            res.points3D = getTriangulatedPoints3D(M, M_, points_0, points_1);
+        }       
+        else if (verify(3, count))  // R:1, t:1
+        {
+            res.R = rt.possibleR[1];
+            res.t = rt.possiblet[1];
+            M_ = getProjectionMatrix(K, res.R, res.t);
+            res.points3D = getTriangulatedPoints3D(M, M_, points_0, points_1);
+        }
+        // find best R, t combination ----------------------------------------------------------------
 
-        res.R = rt.possibleR[0];
-        res.t = rt.possiblet[1];
-        M_ = getProjectionMatrix(K, res.R, res.t);
-        res.points3D = getTriangulatedPoints3D(M, M_, points_0, points_1);
-
-        debugger::PrintMatrix(res.R); std::cout << '\n';
-        debugger::PrintVector(res.t); std::cout << '\n';
-        std::cout << res.points3D.size() << '\n';
 
         // return results
         return res;
     }
-
-
 
 }
 
@@ -689,10 +703,11 @@ bool Triangulation::triangulation(
     /* check if the input is valid ------------------------------------------------------------------*/
     auto valid = GEO1016_A2::isInputValid(points_0, points_1);
     if (!valid)return false;
+    /* check if the input is valid ------------------------------------------------------------------*/
 
 
 
-    /* get transform matrix--------------------------------------------------------------------------*/
+    /* get transform matrix -------------------------------------------------------------------------*/
     auto trans_0 = GEO1016_A2::getNormalizeTransformMatrix(points_0);
     auto trans_1 = GEO1016_A2::getNormalizeTransformMatrix(points_1);
     if (trans_0.second == false || trans_1.second == false)
@@ -702,18 +717,18 @@ bool Triangulation::triangulation(
         return false;
     }
     Matrix33 T = trans_0.first; Matrix33 T_ = trans_1.first;
-    /* get transform matrix--------------------------------------------------------------------------*/
+    /* get transform matrix -------------------------------------------------------------------------*/
 
 
 
-    /* normalize points------------------------------------------------------------------------------*/
+    /* normalize points -----------------------------------------------------------------------------*/
     auto normal_points_0 = GEO1016_A2::NormalizePoints(points_0, T);
     auto normal_points_1 = GEO1016_A2::NormalizePoints(points_1, T_);
-    /* normalize points------------------------------------------------------------------------------*/
+    /* normalize points -----------------------------------------------------------------------------*/
 
 
 
-    /* get initial Fundamental matrix from Wf = 0, use SVD to solve W--------------------------------*/
+    /* get initial Fundamental matrix from Wf = 0, use SVD to solve W -------------------------------*/
     auto Funda = GEO1016_A2::getInitialFundamental(normal_points_0, normal_points_1);
     if (Funda.second == false)
     {
@@ -722,11 +737,11 @@ bool Triangulation::triangulation(
         return false;
     }
     Matrix33 initial_F = Funda.first;
-    /* get initial Fundamental matrix from Wf = 0, use SVD to solve W--------------------------------*/
+    /* get initial Fundamental matrix from Wf = 0, use SVD to solve W -------------------------------*/
 
     
 
-    /* get Fundamental matrix------------------------------------------------------------------------*/
+    /* get Fundamental matrix -----------------------------------------------------------------------*/
     auto FF = GEO1016_A2::getFundamental(initial_F, T, T_);
     if (FF.second == false)
     {
@@ -735,19 +750,19 @@ bool Triangulation::triangulation(
         return false;
     }
     Matrix33 F = FF.first;
-    /* get Fundamental matrix------------------------------------------------------------------------*/
+    /* get Fundamental matrix -----------------------------------------------------------------------*/
 
 
 
-    /* get intrinsic matrix K------------------------------------------------------------------------*/
+    /* get intrinsic matrix K -----------------------------------------------------------------------*/
     Matrix33 K = GEO1016_A2::getIntrinsicK(fx, fy, cx, cy);
-    /* get intrinsic matrix K------------------------------------------------------------------------*/
+    /* get intrinsic matrix K -----------------------------------------------------------------------*/
 
 
 
-    /* get Essential matrix--------------------------------------------------------------------------*/
+    /* get Essential matrix -------------------------------------------------------------------------*/
     Matrix33 E = GEO1016_A2::getEssential(F, K);
-    /* get Essential matrix--------------------------------------------------------------------------*/
+    /* get Essential matrix -------------------------------------------------------------------------*/
 
 
 
@@ -756,26 +771,10 @@ bool Triangulation::triangulation(
     R = res.R;
     t = res.t;
     points_3d = res.points3D;
-    /* get relative pose-----------------------------------------------------------------------------*/
+    /* get relative pose ----------------------------------------------------------------------------*/
     
 
 
-    // debug
-    //debugger::PrintMatrix(K);
-    //std::cout << determinant(rt.possibleR[1]);
-
-    // TODO: Reconstruct 3D points. The main task is
-    //      - triangulate a pair of image points (i.e., compute the 3D coordinates for each corresponding point pair)
-
-    // TODO: Don't forget to
-    //          - write your recovered 3D points into 'points_3d' (so the viewer can visualize the 3D points for you);
-    //          - write the recovered relative pose into R and t (the view will be updated as seen from the 2nd camera,
-    //            which can help you check if R and t are correct).
-    //       You must return either 'true' or 'false' to indicate whether the triangulation was successful (so the
-    //       viewer will be notified to visualize the 3D points and update the view).
-    //       There are a few cases you should return 'false' instead, for example:
-    //          - function not implemented yet;
-    //          - input not valid (e.g., not enough points, point numbers don't match);
-    //          - encountered failure in any step.
+    /* if no res found, res.points3D remains 0, will not trigger the update of viewer ---------------*/
     return points_3d.size() > 0;
 }
