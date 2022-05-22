@@ -68,6 +68,10 @@ Meanwhile some helpful information should be printed to the console.
 
 $\frac{\sum \sqrt{\left ( \Delta x \right )^2 + \left ( \Delta y \right )^2}}{N(points)}$
 
+$\Delta x$: obtained `x` coordinate $-$ original `x` coordinate
+
+$\Delta y$: obtained `y` coordinate $-$ original `y` coordinate
+
 average difference for image 0 `(points_0)` is:
 `1.04006`
 
