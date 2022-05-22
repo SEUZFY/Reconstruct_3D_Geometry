@@ -587,7 +587,7 @@ namespace GEO1016_A2 {
         // variables help to estimate the combinations -----------------------------------------------
         
         
-        // define Lambda function: getCount
+        // define Lambda: getCount
         // because the following code is (basically) the same for 4 different R, t combinations
         // use Lambda to avoid repetition
         // @changeable params:
@@ -709,41 +709,52 @@ namespace GEO1016_A2 {
         const std::vector<Vector2D>& points_0,
         const std::vector<Vector2D>& points_1)
     {
+        // useful helpers ----------------------------------------------------------------------------
         // define identity matrix
         Matrix33 I(
             1, 0, 0,
             0, 1, 0,
             0, 0, 1
         );
+        Vector3D zero_t(0.0, 0.0, 0.0);  // define 0 translation vector
+        Matrix34 M = getProjectionMatrix(K, I, zero_t);  // projection matrix for camera_0 (image_0)
+        Matrix34 M_ = getProjectionMatrix(K, R, t);  // projection matrix for camera_1 (image_1)
+        // useful helpers ----------------------------------------------------------------------------
+        
 
-        // define 0 translation vector
-        Vector3D zero_t(0.0, 0.0, 0.0);
-
-        // projection matrix for camera_0 (image_0)
-        Matrix34 M = getProjectionMatrix(K, I, zero_t);
-
-        // projection matrix for camera_1 (image_1)
-        Matrix34 M_ = getProjectionMatrix(K, R, t);
-
-        // image_0 -----------------------------------------------------------------------------------
-        for (const auto& p : points_3d) 
+        // Lambda - calculate the difference ---------------------------------------------------------
+        auto getdiff = [&](
+            const Matrix& M_projection,  // projection matrix
+            const std::vector<Vector3D>& points_3D,  // recovered 3D points
+            const std::vector<Vector2D>& points_2D   // compare with the know 2D points
+            ) -> double
         {
-            Vector3D p3D  = M * p.homogeneous();
-            Vector2D p2D  = p3D.cartesian();
-            //std::cout << p2D.x() << ", " << p2D.y() << '\n';
-        }
-        // image_0 -----------------------------------------------------------------------------------
+            double diff{};
+            double N = static_cast<double>(points_3D.size());
+            for (std::size_t i = 0; i != points_3D.size(); ++i)
+            {
+                // re-project 3D point to 2D
+                Vector3D p3D = M * points_3D[i].homogeneous();
+                Vector2D p2D = p3D.cartesian();
+                
+                // compare the difference
+                const Vector2D& rhs = points_2D[i];  // original points_2D
+                double dx = p2D.x() - rhs.x();
+                double dy = p2D.y() - rhs.y();
+                diff += sqrt(dx * dx + dy * dy);
+            }
+            return diff / N;
+        };
+        // Lambda - calculate the difference ---------------------------------------------------------
+        
+
+        // get the difference for two images ---------------------------------------------------------
+        double diff_0 = getdiff(M, points_3d, points_0);  // image_0
+        double diff_1 = getdiff(M_,points_3d, points_1);  // image_1
+        // get the difference for two images ---------------------------------------------------------
 
 
-        // image_1 -----------------------------------------------------------------------------------
-        for (const auto& p : points_3d)
-        {
-            Vector3D p3D = M_ * p.homogeneous();
-            Vector2D p2D = p3D.cartesian();
-            std::cout << p2D.x() << ", " << p2D.y() << '\n';
-        }
-        // image_1 -----------------------------------------------------------------------------------
-        return std::make_pair(0, 0);
+        return std::make_pair(diff_0, diff_1);
     }
 }
 
@@ -847,12 +858,30 @@ bool Triangulation::triangulation(
     
 
 
-    /* evaluate ------------------------------------------------*/
-    auto var = GEO1016_A2::Evaluate(K, R, t, points_3d, points_0, points_1);
-    /* evaluate ------------------------------------------------*/
+    /* initially verify the result: if points_3d contains the same points as points_0 or points_1 ---*/
+    if (points_3d.size() != points_0.size())
+    {
+        LOG(ERROR) << "recover points_3d fail, please check\n"
+            << "getRelativePose() function in triangulation_method.cpp\n";
+        return false;
+    }
+    /* initially verify the result ------------------------------------------------------------------*/
 
 
 
-    /* if no res found, res.points3D remains 0, will not trigger the update of viewer ---------------*/
-    return points_3d.size() > 0;
+    /* evaluate -------------------------------------------------------------------------------------*/
+    auto avg_diff = GEO1016_A2::Evaluate(K, R, t, points_3d, points_0, points_1);
+    std::cout << "average difference for image 0 is: \n"; std::cout << avg_diff.first << '\n';
+    std::cout << "average difference for image 1 is: \n"; std::cout << avg_diff.second << '\n';
+    /* evaluate -------------------------------------------------------------------------------------*/
+
+
+
+    /* return true if all steps are executed correctly ----------------------------------------------*/
+    return true;
+
+
+
+    /* ----------------------------------------------------------------------------------------------*/
+
 }
