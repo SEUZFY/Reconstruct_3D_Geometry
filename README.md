@@ -58,7 +58,7 @@ Meanwhile some helpful information should be printed to the console.
   
   < https://3d.bk.tudelft.nl/liangliang/ > 
 
-* The `triangulation implementation` is [here](https://github.com/SEUZFY/Reconstruct_3D_Geometry/blob/master/Triangulation/triangulation_method.cpp), all the other files are kindly given by [Liang Liang](https://3d.bk.tudelft.nl/liangliang/).
+* The `triangulation implementation` is in [Triangulation_method.cpp](https://github.com/SEUZFY/Reconstruct_3D_Geometry/blob/master/Triangulation/triangulation_method.cpp), all the other files are kindly given by [Liang Liang](https://3d.bk.tudelft.nl/liangliang/).
 
 * The `workflow` is illustrated with some code examples [here](https://github.com/SEUZFY/Reconstruct_3D_Geometry/blob/master/Triangulation_materials/3DGeometry_from_2images_workflow.pdf).
 
