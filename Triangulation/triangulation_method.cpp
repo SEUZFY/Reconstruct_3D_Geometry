@@ -785,20 +785,16 @@ namespace GEO1016_A2 {
     * To use the API we need to provide our own data via "data" pointer
     * define Data struct to store the data we need to provide to the API
     */
-    struct Data {
-        Matrix34 M;   /* projection matrix for image_0 */
-        //Matrix34 M_;  /* projection matrix for image_1 */
-        //std::vector<Vector3D>& points_3d;  /* initially recovered 3d points */
-        //std::vector<Vector3D>& points_3d_optimized;  /* optimized 3d points */
-        std::vector<Vector2D> points_0;  /* 2d points for image_0 */
-        //std::vector<Vector2D>& points_1;  /* 2d points for image_1 */
-
-        Data(const Matrix34& m, const std::vector<Vector2D>& pts_0)
+    struct MyData {
+        Matrix33 x;
+        std::vector<double> base;
+        MyData()
         {
-            M = m;
-            points_0 = pts_0;
+            base.reserve(3);
+            base.emplace_back(1.0);
+            base.emplace_back(1.0);
+            base.emplace_back(1.0);
         }
-        
     };
 
     /*
@@ -807,7 +803,7 @@ namespace GEO1016_A2 {
     */
     class MyObjective : public Objective_LM {
     public:
-        MyObjective(int num_func, int num_var, Data* data_) : Objective_LM(num_func, num_var, data_) 
+        MyObjective(int num_func, int num_var, MyData* data_) : Objective_LM(num_func, num_var, data_) 
         {
             data = data_;  // user-defined data
         }
@@ -848,32 +844,12 @@ namespace GEO1016_A2 {
          */
         int evaluate(const double* x, double* fvec)
         {
-            Matrix34 M = data->M;  /* projection matrix */
-            int k{}, m{}, n{};  /* k: index of points_0 m: index of x(store variables) n: functions*/
-            while (k < data->points_0.size())
-            {
-                double homo_x = M(0, 0) * x[m] + M(0, 1) * x[m + 1] + M(0, 2) * x[m + 2] + M(0, 3) * x[m + 3];
-                double homo_y = M(1, 0) * x[m] + M(1, 1) * x[m + 1] + M(1, 2) * x[m + 2] + M(1, 3) * x[m + 3];
-                double homo_z = M(2, 0) * x[m] + M(2, 1) * x[m + 1] + M(2, 2) * x[m + 2] + M(2, 3) * x[m + 3];
-                double cal_x = abs(homo_z) > 1e-8 ? (homo_x / homo_z) : homo_x;
-                double cal_y = abs(homo_z) > 1e-8 ? (homo_y / homo_z) : homo_y;
-
-                const Vector2D& original_2d_point = data->points_0[k];
-                fvec[n]   = cal_x - original_2d_point.x();
-                fvec[n+1] = cal_y - original_2d_point.y();
-
-                k += 1;
-                m += 4;
-                n += 2;
-
-                // test 
-                std::cout << k << '\n';
-            }
+            for (int i = 0; i < 3; ++i)
+                fvec[i] = x[i] - data->base[i];
             return 0;
-
         }
     protected:
-        Data* data;
+        MyData* data;
     };
 
 }
@@ -1029,19 +1005,18 @@ bool Triangulation::triangulation(
     * initialize the objective function
     * 1st argument is the number of functions, 2nd the number of variables
     */
-    GEO1016_A2::Data data(M, points_0);
+    GEO1016_A2::MyData data;
+    GEO1016_A2::MyObjective obj(3, 3, &data);
 
-    int num_func = 2 * static_cast<int>(points_0.size());
-    int num_var  = 4 * static_cast<int>(points_3d.size());
-
-    GEO1016_A2::MyObjective obj(num_func, num_var, &data);  // pass deifined data
+    //int num_func = 2 * static_cast<int>(points_0.size());
+    //int num_var  = 4 * static_cast<int>(points_3d.size());
 
     /* create an instance of the Levenberg - Marquardt(LM for short) optimizer */
     Optimizer_LM lm;
 
     /* initialized the variables.Later x will be modified after optimization. */
-    std::vector<double> x(num_var, 0);
-    GEO1016_A2::setOptimizeVariables(x, num_var, points_3d);  // add values to x
+    std::vector<double> x = { 5.0, -16.0, 3.0 };
+    //GEO1016_A2::setOptimizeVariables(x, 4, points_3d);  // add values to x
 
     /* optimize(i.e., minimizing the objective function).*/
     bool status = lm.optimize(&obj, x);
