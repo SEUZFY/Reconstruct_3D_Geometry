@@ -847,8 +847,9 @@ namespace GEO1016_A2 {
             {
                 fvec[j] = x[i] - data->points_3d[k].x();
                 fvec[j+1] = x[i+1] - data->points_3d[k].y();
-                i += 2;
-                j += 2;
+                fvec[j+2] = x[i+2] - data->points_3d[k].z();
+                i += 3;
+                j += 3;
                 k += 1;
             }
             return 0;
@@ -1011,8 +1012,8 @@ bool Triangulation::triangulation(
     * 1st argument is the number of functions, 2nd the number of variables
     */
     GEO1016_A2::MyData data(I, points_3d);
-    int num_func = static_cast<int>(points_3d.size()) * 2;
-    int num_var  = static_cast<int>(points_3d.size()) * 2;
+    int num_func = static_cast<int>(points_3d.size()) * 3;
+    int num_var  = static_cast<int>(points_3d.size()) * 3;
     GEO1016_A2::MyObjective obj(num_func, num_var, &data);
 
     //int num_func = 2 * static_cast<int>(points_0.size());
