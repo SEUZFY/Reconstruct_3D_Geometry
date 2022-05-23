@@ -1040,7 +1040,7 @@ bool Triangulation::triangulation(
     /* initialized the variables.Later x will be modified after optimization. */
     //double* x = new double[num_var];
     std::vector<double> x(num_var, 0);
-    GEO1016_A2::setOptimizeVariables(x, num_var, points_3d);
+    //GEO1016_A2::setOptimizeVariables(x, num_var, points_3d);
 
 
     /* optimize(i.e., minimizing the objective function).*/
