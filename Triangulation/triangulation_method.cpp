@@ -786,14 +786,16 @@ namespace GEO1016_A2 {
     * define Data struct to store the data we need to provide to the API
     */
     struct MyData {
-        Matrix33 x;
-        std::vector<double> base;
-        MyData()
+        Matrix33 M;
+        std::vector<double> points_0;
+        MyData(const Matrix33& m)
         {
-            base.reserve(3);
-            base.emplace_back(1.0);
-            base.emplace_back(1.0);
-            base.emplace_back(1.0);
+            points_0.reserve(3);
+            points_0.emplace_back(1.0);
+            points_0.emplace_back(1.0);
+            points_0.emplace_back(1.0);
+
+            M = m;
         }
     };
 
@@ -845,7 +847,7 @@ namespace GEO1016_A2 {
         int evaluate(const double* x, double* fvec)
         {
             for (int i = 0; i < 3; ++i)
-                fvec[i] = x[i] - data->base[i];
+                fvec[i] = x[i] - data->points_0[i];
             return 0;
         }
     protected:
@@ -1005,7 +1007,7 @@ bool Triangulation::triangulation(
     * initialize the objective function
     * 1st argument is the number of functions, 2nd the number of variables
     */
-    GEO1016_A2::MyData data;
+    GEO1016_A2::MyData data(I);
     GEO1016_A2::MyObjective obj(3, 3, &data);
 
     //int num_func = 2 * static_cast<int>(points_0.size());
@@ -1015,7 +1017,7 @@ bool Triangulation::triangulation(
     Optimizer_LM lm;
 
     /* initialized the variables.Later x will be modified after optimization. */
-    std::vector<double> x = { 5.0, -16.0, 3.0 };
+    std::vector<double> x = { 1.01, 1.01, 1.01 };
     //GEO1016_A2::setOptimizeVariables(x, 4, points_3d);  // add values to x
 
     /* optimize(i.e., minimizing the objective function).*/
@@ -1023,8 +1025,8 @@ bool Triangulation::triangulation(
 
     /* retrieve the result. */
 
-    //std::cout << "the solution is:     " << x[0] << ", " << x[1] << std::endl;
-    //std::cout << "the expected result: 0, 0" << std::endl;
+    std::cout << "the solution is:     " << x[0] << ", " << x[1] << ", " << x[2] << std::endl;
+    std::cout << "the expected result: 1, 1, 1" << std::endl;
 
     return status;
 
