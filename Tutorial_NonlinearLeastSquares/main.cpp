@@ -101,18 +101,18 @@ int main(int argc, char **argv) {
     /// the number of functions must > 1 ?
     /// 
     /// user-defined daya
-    //Mydata data;
-    //MyObjective obj(3, 3, &data);
+    Mydata data;
+    MyObjective obj(3, 3, &data);
 
     /// create an instance of the Levenberg-Marquardt (LM for short) optimizer
-    //Optimizer_LM lm;
+    Optimizer_LM lm;
 
     /// initialized the variables. Later x will be modified after optimization.
     /// initial values will affect the results
-    //std::vector<double> x = { 5.0, -16.0, 3.0};
+    std::vector<double> x = { 5.0, -16.0, 3.0};
 
     /// optimize (i.e., minimizing the objective function).
-    //bool status = lm.optimize(&obj, x);
+    bool status = lm.optimize(&obj, x);
 
     /// retrieve the result.
     //std::cout << "the solution is:     " << x[0] << ", " << x[1] << "," << x[2] << std::endl;
@@ -120,10 +120,10 @@ int main(int argc, char **argv) {
 
     //return status;
 
-    int size = 480;
+    /*int size = 480;
     double x[480] = { 0 };
     std::vector<Vector3D> points_3d(160, Vector3D(0, 0, 0));
-    setOptimizeVariables(x, size, points_3d);
+    setOptimizeVariables(x, size, points_3d);*/
 
     return 0;
 }

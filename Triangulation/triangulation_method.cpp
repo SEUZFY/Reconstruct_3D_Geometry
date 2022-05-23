@@ -866,7 +866,7 @@ namespace GEO1016_A2 {
                 n += 2;
 
                 // test 
-                //std::cout << k << '\n';
+                std::cout << k << '\n';
             }
             return 0;
 
