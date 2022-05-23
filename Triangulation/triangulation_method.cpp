@@ -841,9 +841,16 @@ namespace GEO1016_A2 {
          * SPECIAL THANKS to Nail, he explains very clearly to me
          */
         int evaluate(const double* x, double* fvec)
-        {
-            for (int i = 0; i < data->points_3d.size(); ++i)
-                fvec[i] = x[i] - data->points_3d[i].x();
+        {           
+            int i = 0, j = 0, k = 0;
+            while (k < data->points_3d.size())
+            {
+                fvec[j] = x[i] - data->points_3d[k].x();
+                fvec[j+1] = x[i+1] - data->points_3d[k].y();
+                i += 2;
+                j += 2;
+                k += 1;
+            }
             return 0;
         }
     protected:
@@ -1004,7 +1011,9 @@ bool Triangulation::triangulation(
     * 1st argument is the number of functions, 2nd the number of variables
     */
     GEO1016_A2::MyData data(I, points_3d);
-    GEO1016_A2::MyObjective obj(points_3d.size(), points_3d.size(), &data);
+    int num_func = static_cast<int>(points_3d.size()) * 2;
+    int num_var  = static_cast<int>(points_3d.size()) * 2;
+    GEO1016_A2::MyObjective obj(num_func, num_var, &data);
 
     //int num_func = 2 * static_cast<int>(points_0.size());
     //int num_var  = 4 * static_cast<int>(points_3d.size());
@@ -1013,7 +1022,7 @@ bool Triangulation::triangulation(
     Optimizer_LM lm;
 
     /* initialized the variables.Later x will be modified after optimization. */
-    std::vector<double> x(160, 1);
+    std::vector<double> x(num_var, 1);
     //GEO1016_A2::setOptimizeVariables(x, 4, points_3d);  // add values to x
 
     /* optimize(i.e., minimizing the objective function).*/
