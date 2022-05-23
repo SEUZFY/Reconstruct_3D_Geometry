@@ -191,3 +191,21 @@
     //          - function not implemented yet;
     //          - input not valid (e.g., not enough points, point numbers don't match);
     //          - encountered failure in any step.
+
+
+
+    // ----------------------------------------------------------------------------------------------------
+
+
+   
+    /*std::cout << "test: " << '\n';
+    int i{}, k{};
+    while (i < size && k < points_3d.size())
+    {
+        std::cout << "x: " << x[i] << "," << x[i + 1] << "," << x[i + 2] << '\n';
+        std::cout << "o: " << points_3d[k].x() << "," << points_3d[k].y() << "," << points_3d[k].z() << '\n';
+        std::cout << '\n';
+       
+        i += 3;
+        k += 1;
+    }*/

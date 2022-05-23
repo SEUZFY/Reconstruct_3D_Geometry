@@ -776,8 +776,6 @@ namespace GEO1016_A2 {
 
             i += 3;
             k += 1;
-
-            std::cout << "i: " << i << '\n';
         }
     }
 
@@ -868,7 +866,7 @@ namespace GEO1016_A2 {
                 n += 2;
 
                 // test 
-                std::cout << k << '\n';
+                //std::cout << k << '\n';
             }
             return 0;
 
@@ -1030,28 +1028,31 @@ bool Triangulation::triangulation(
     * initialize the objective function
     * 1st argument is the number of functions, 2nd the number of variables
     */
-    //GEO1016_A2::Data data(M, points_0);
-    //GEO1016_A2::MyObjective obj(320, 480, &data);
+    GEO1016_A2::Data data(M, points_0);
+    int num_func = 2 * static_cast<int>(points_0.size());
+    int num_var  = 3 * static_cast<int>(points_3d.size());
+
+    GEO1016_A2::MyObjective obj(num_func, num_var, &data);
 
     /* create an instance of the Levenberg - Marquardt(LM for short) optimizer */
-    //Optimizer_LM lm;
+    Optimizer_LM lm;
 
     /* initialized the variables.Later x will be modified after optimization. */
-    //double x[] = {0};
-    //GEO1016_A2::setOptimizeVariables(x, 480, points_3d);
+    double* x = new double[num_var];
+    GEO1016_A2::setOptimizeVariables(x, num_var, points_3d);
 
-    //std::vector<double> x = {4.0, -4.0, -4.0};
 
     /* optimize(i.e., minimizing the objective function).*/
-    //bool status = lm.optimize(&obj, x);
+    bool status = lm.optimize(&obj, x);
 
-    /// retrieve the result.
+    /* retrieve the result. */
+
     //std::cout << "the solution is:     " << x[0] << ", " << x[1] << std::endl;
     //std::cout << "the expected result: 0, 0" << std::endl;
 
     //return status;
 
-
+    delete[] x;
 
     /* return true if all steps are executed correctly ----------------------------------------------*/
     return true;
