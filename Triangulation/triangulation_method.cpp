@@ -843,11 +843,17 @@ namespace GEO1016_A2 {
         int evaluate(const double* x, double* fvec)
         {           
             int i = 0, j = 0, k = 0;
+            Matrix33 M = data->M;
             while (k < data->points_3d.size())
             {
-                fvec[j] = x[i] - data->points_3d[k].x();
-                fvec[j+1] = x[i+1] - data->points_3d[k].y();
-                fvec[j+2] = x[i+2] - data->points_3d[k].z();
+                double cal_x = M[0][0] * x[i] + M[0][1] * x[i + 1] + M[0][2] * x[i + 2];
+                double cal_y = M[1][0] * x[i] + M[1][1] * x[i + 1] + M[1][2] * x[i + 2];
+                double cal_z = M[2][0] * x[i] + M[2][1] * x[i + 1] + M[2][2] * x[i + 2];
+                
+                fvec[j]   = cal_x - data->points_3d[k].x();
+                fvec[j+1] = cal_y - data->points_3d[k].y();
+                fvec[j+2] = cal_z - data->points_3d[k].z();
+
                 i += 3;
                 j += 3;
                 k += 1;
