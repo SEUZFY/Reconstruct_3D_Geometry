@@ -24,6 +24,9 @@
 
 #include <iostream>
 #include <easy3d/optimizer/optimizer_lm.h>
+#include <Triangulation/triangulation.h>
+#include <Triangulation/matrix_algo.h>
+
 
 using namespace easy3d;
 
@@ -44,6 +47,25 @@ struct Mydata {
         base.emplace_back(1.0);
     }
 };
+
+void setOptimizeVariables(double* x, int size, const std::vector<Vector3D>& points_3d)
+{
+    int i{}, k{};
+    while (i < size && k < points_3d.size())
+    {
+        x[i] = points_3d[k].x();
+        x[i + 1] = points_3d[k].y();
+        x[i + 2] = points_3d[k].z();
+
+        int a = i, b = i + 1, c = i + 2;
+        std::cout << "a: " << a << "b: " << b << "c: " << c << '\n';
+
+        i += 3;
+        k += 1;
+
+        
+    }
+}
 
 class MyObjective : public Objective_LM {
 public:
@@ -79,22 +101,29 @@ int main(int argc, char **argv) {
     /// the number of functions must > 1 ?
     /// 
     /// user-defined daya
-    Mydata data; std::cout << data.base.size();
-    MyObjective obj(3, 3, &data);
+    //Mydata data;
+    //MyObjective obj(3, 3, &data);
 
     /// create an instance of the Levenberg-Marquardt (LM for short) optimizer
-    Optimizer_LM lm;
+    //Optimizer_LM lm;
 
     /// initialized the variables. Later x will be modified after optimization.
     /// initial values will affect the results
-    std::vector<double> x = { 5.0, -16.0, 3.0};
+    //std::vector<double> x = { 5.0, -16.0, 3.0};
 
     /// optimize (i.e., minimizing the objective function).
-    bool status = lm.optimize(&obj, x);
+    //bool status = lm.optimize(&obj, x);
 
     /// retrieve the result.
-    std::cout << "the solution is:     " << x[0] << ", " << x[1] << "," << x[2] << std::endl;
+    //std::cout << "the solution is:     " << x[0] << ", " << x[1] << "," << x[2] << std::endl;
     //std::cout << "the expected result: 0, 0" << std::endl;
 
-    return status;
+    //return status;
+
+    int size = 480;
+    double x[480] = { 0 };
+    std::vector<Vector3D> points_3d(160, Vector3D(0, 0, 0));
+    setOptimizeVariables(x, size, points_3d);
+
+    return 0;
 }
