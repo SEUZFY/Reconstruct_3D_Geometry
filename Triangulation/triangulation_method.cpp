@@ -1037,7 +1037,15 @@ bool Triangulation::triangulation(
 
     /* retrieve the result. */
 
-    std::cout << "the solution is:     " << x[0] << ", " << x[1] << ", " << x[2] << std::endl;
+    std::cout << "the solution is: ";
+    int i = 0;
+    for (const auto& co : x)
+    {
+        if(i<3)
+            std::cout << co << " ";
+        ++i;
+        //if (i > 0 && i % 3 == 0)std::cout << '\n';
+    }
     //std::cout << "the expected result: 1, 1, 1" << std::endl;
 
     return status;
