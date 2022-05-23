@@ -762,12 +762,56 @@ namespace GEO1016_A2 {
 
 
     /*
+    * store the re-projected 3d points' x and y coordinates 
+    * in a double array - to be passed to the optimize function: lm.optimize(&obj, x);
+    */
+    void setOptimizeVariables(double* x, int size, const std::vector<Vector3D>& points_3d)
+    {
+        int i{}, k{};
+        while (i < size && k < points_3d.size())
+        {
+            x[i]     = points_3d[k].x();
+            x[i + 1] = points_3d[k].y();
+            x[i + 2] = points_3d[k].z();
+
+            i += 3;
+            k += 1;
+
+            std::cout << "i: " << i << '\n';
+        }
+    }
+
+
+    /*
+    * To use the API we need to provide our own data via "data" pointer
+    * define Data struct to store the data we need to provide to the API
+    */
+    struct Data {
+        Matrix34 M;   /* projection matrix for image_0 */
+        //Matrix34 M_;  /* projection matrix for image_1 */
+        //std::vector<Vector3D>& points_3d;  /* initially recovered 3d points */
+        //std::vector<Vector3D>& points_3d_optimized;  /* optimized 3d points */
+        std::vector<Vector2D> points_0;  /* 2d points for image_0 */
+        //std::vector<Vector2D>& points_1;  /* 2d points for image_1 */
+
+        Data(const Matrix34& m, const std::vector<Vector2D>& pts_0)
+        {
+            M = m;
+            points_0 = pts_0;
+        }
+        
+    };
+
+    /*
     * To use the Levenberg-Marquardt method to solve a non-linear least squares method, 
     * we need to define our own objective function that inherits 'Objective_LM'.
     */
     class MyObjective : public Objective_LM {
     public:
-        MyObjective(int num_func, int num_var) : Objective_LM(num_func, num_var) {}
+        MyObjective(int num_func, int num_var, Data* data_) : Objective_LM(num_func, num_var, data_) 
+        {
+            data = data_;  // user-defined data
+        }
 
         /**
          *  Calculate the values of each function at x and return the function values as a vector in fvec.
@@ -775,19 +819,62 @@ namespace GEO1016_A2 {
          *  @param  fvec        Return the value vector of all the functions.
          *  @return Return a negative value to terminate.
          *
-         *  NOTE: This function implements f = (x0 - 1.0)^2 + (x1 - 1.0)^2. A client problem must implement
-         *      this function to evaluate the values of each function in the expression of x.
          *  NOTE:
-         *  in our case, there are points.size() variables and functions
+         *  the objective is: Min SUM || MPi - pi ||^2
+         *  || MPi - pi || is the length of the residual vector: MPi - pi = r
+         *  then || MPi - pi || = || r || = sqrt(r.x * r.x + r.y * r.y)
+         *  
+         *  thus, the objective is then turned into:
+         *  Min SUM || r ||^2 = Min SUM (x^2 + y^2) = Min SUM (x0^2 + x1^2)
+         *  
+         * because we CAN NOT change the type of x parameter
+         * we store the re-projected 3d points¡¯coordinates all in x:
+         * thus x should contain 2 * points.size() elements
+         * store each x, y coordinate for each point.
+         * 
+         * e.g.:
+         * x[0], x[1] - indicating the first  point's x and y coordinate
+         * x[2], x[3] - indicating the second point's x and y coordinate
+         * ...
+         * thus we should have points.size() * 2 variables (in our case 2 * 160 = 320 variables)
+         * and  we should have points.size() * 2 functions, since for each point we need two objective functions.
+         * therefore the objective would be:
+         * MyObjective obj(160, 320, &data);  -> in our case
+         * 
+         * GOOD TO KNOW
+         * the optimize functions do the squared residuals internally
+         * so we only need to define the residuals in the evaluation() function body like so:
+         * fvec[i] = x[i] - original_x
+         * SPECIAL THANKS to Nail, he explains very clearly to me
          */
-        int evaluate(const Vector3D* x, Vector3D* fvec)
+        int evaluate(const double* x, double* fvec)
         {
-            // x: residuals
-            //fvec[i] = x[i];
-            Vector3D base(3.0, 3.0, 3.0);
-            fvec[0] = x[0] - base;
+            Matrix34 M = data->M;  /* projection matrix */
+            int k{}, m{}, n{};  /* k: index of points_0 m: index of x(store variables) n: functions*/
+            while (k < data->points_0.size())
+            {
+                double homo_x = M(0, 0) * x[m] + M(0, 1) * x[m + 1] + M(0, 2) * x[m + 2];
+                double homo_y = M(1, 0) * x[m] + M(1, 1) * x[m + 1] + M(1, 2) * x[m + 2];
+                double homo_z = M(2, 0) * x[m] + M(2, 1) * x[m + 1] + M(2, 2) * x[m + 2];
+                double cal_x = abs(homo_z) > 1e-8 ? (homo_x / homo_z) : homo_x;
+                double cal_y = abs(homo_z) > 1e-8 ? (homo_y / homo_z) : homo_y;
+
+                const Vector2D& original_2d_point = data->points_0[k];
+                fvec[n]   = cal_x - original_2d_point.x();
+                fvec[n+1] = cal_y - original_2d_point.y();
+
+                k += 1;
+                m += 3;
+                n += 2;
+
+                // test 
+                std::cout << k << '\n';
+            }
             return 0;
+
         }
+    protected:
+        Data* data;
     };
 
 }
@@ -943,12 +1030,16 @@ bool Triangulation::triangulation(
     * initialize the objective function
     * 1st argument is the number of functions, 2nd the number of variables
     */
-    GEO1016_A2::MyObjective obj(1, 1);
+    //GEO1016_A2::Data data(M, points_0);
+    //GEO1016_A2::MyObjective obj(320, 480, &data);
 
     /* create an instance of the Levenberg - Marquardt(LM for short) optimizer */
-    Optimizer_LM lm;
+    //Optimizer_LM lm;
 
     /* initialized the variables.Later x will be modified after optimization. */
+    //double x[] = {0};
+    //GEO1016_A2::setOptimizeVariables(x, 480, points_3d);
+
     //std::vector<double> x = {4.0, -4.0, -4.0};
 
     /* optimize(i.e., minimizing the objective function).*/
