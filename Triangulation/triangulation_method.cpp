@@ -787,14 +787,10 @@ namespace GEO1016_A2 {
     */
     struct MyData {
         Matrix33 M;
-        std::vector<double> points_0;
-        MyData(const Matrix33& m)
+        std::vector<Vector3D> points_3d;
+        MyData(const Matrix33& m, const std::vector<Vector3D>& points3D)
         {
-            points_0.reserve(3);
-            points_0.emplace_back(1.0);
-            points_0.emplace_back(1.0);
-            points_0.emplace_back(1.0);
-
+            points_3d = points3D;
             M = m;
         }
     };
@@ -847,7 +843,7 @@ namespace GEO1016_A2 {
         int evaluate(const double* x, double* fvec)
         {
             for (int i = 0; i < 3; ++i)
-                fvec[i] = x[i] - data->points_0[i];
+                fvec[i] = x[i] - data->points_3d[i].x();
             return 0;
         }
     protected:
@@ -1007,7 +1003,7 @@ bool Triangulation::triangulation(
     * initialize the objective function
     * 1st argument is the number of functions, 2nd the number of variables
     */
-    GEO1016_A2::MyData data(I);
+    GEO1016_A2::MyData data(I, points_3d);
     GEO1016_A2::MyObjective obj(3, 3, &data);
 
     //int num_func = 2 * static_cast<int>(points_0.size());
@@ -1026,7 +1022,7 @@ bool Triangulation::triangulation(
     /* retrieve the result. */
 
     std::cout << "the solution is:     " << x[0] << ", " << x[1] << ", " << x[2] << std::endl;
-    std::cout << "the expected result: 1, 1, 1" << std::endl;
+    //std::cout << "the expected result: 1, 1, 1" << std::endl;
 
     return status;
 
