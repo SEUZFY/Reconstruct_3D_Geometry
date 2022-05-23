@@ -773,8 +773,9 @@ namespace GEO1016_A2 {
             x[i]     = points_3d[k].x();
             x[i + 1] = points_3d[k].y();
             x[i + 2] = points_3d[k].z();
+            x[i + 3] = 1.0;
 
-            i += 3;
+            i += 4;
             k += 1;
         }
     }
@@ -851,9 +852,9 @@ namespace GEO1016_A2 {
             int k{}, m{}, n{};  /* k: index of points_0 m: index of x(store variables) n: functions*/
             while (k < data->points_0.size())
             {
-                double homo_x = M(0, 0) * x[m] + M(0, 1) * x[m + 1] + M(0, 2) * x[m + 2];
-                double homo_y = M(1, 0) * x[m] + M(1, 1) * x[m + 1] + M(1, 2) * x[m + 2];
-                double homo_z = M(2, 0) * x[m] + M(2, 1) * x[m + 1] + M(2, 2) * x[m + 2];
+                double homo_x = M(0, 0) * x[m] + M(0, 1) * x[m + 1] + M(0, 2) * x[m + 2] + M(0, 3) * x[m + 3];
+                double homo_y = M(1, 0) * x[m] + M(1, 1) * x[m + 1] + M(1, 2) * x[m + 2] + M(1, 3) * x[m + 3];
+                double homo_z = M(2, 0) * x[m] + M(2, 1) * x[m + 1] + M(2, 2) * x[m + 2] + M(2, 3) * x[m + 3];
                 double cal_x = abs(homo_z) > 1e-8 ? (homo_x / homo_z) : homo_x;
                 double cal_y = abs(homo_z) > 1e-8 ? (homo_y / homo_z) : homo_y;
 
@@ -862,7 +863,7 @@ namespace GEO1016_A2 {
                 fvec[n+1] = cal_y - original_2d_point.y();
 
                 k += 1;
-                m += 3;
+                m += 4;
                 n += 2;
 
                 // test 
@@ -1031,7 +1032,7 @@ bool Triangulation::triangulation(
     GEO1016_A2::Data data(M, points_0);
 
     int num_func = 2 * static_cast<int>(points_0.size());
-    int num_var  = 3 * static_cast<int>(points_3d.size());
+    int num_var  = 4 * static_cast<int>(points_3d.size());
 
     GEO1016_A2::MyObjective obj(num_func, num_var, &data);  // pass deifined data
 

@@ -37,7 +37,7 @@ using namespace easy3d;
 
 // user-defined data
 struct Mydata {
-    double s = 2.0;
+    Matrix33 x;
     std::vector<double> base;
     Mydata()
     {
