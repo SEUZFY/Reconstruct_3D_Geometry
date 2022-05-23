@@ -368,7 +368,7 @@ namespace GEO1016_A2 {
         std::vector<Matrix33> possibleR;  // store two possible Rotation matrices
         std::vector<Vector3D> possiblet;  // store two possible translation vectors
         Rt() { possibleR.reserve(2); possiblet.reserve(2); }      
-    };
+    };  
 
     /*
     * getPossibleRt
@@ -756,6 +756,54 @@ namespace GEO1016_A2 {
 
         return std::make_pair(diff_0, diff_1);
     }
+
+
+
+    /* ----------------------------------------------------------------------------------------------*/
+
+
+
+    /*
+    * The basic implementations are above.
+    * The following is for optimization using the Levenberg-Marquardt method.
+    * The code is inspired by LiangLiang and Nail's tutotial -> Tutorial_NonlinearLeastSquares/main.cpp
+    */
+
+
+
+    /* ----------------------------------------------------------------------------------------------*/
+
+
+
+    /*
+    * To use the Levenberg-Marquardt method to solve a non-linear least squares method, 
+    * we need to define our own objective function that inherits 'Objective_LM'.
+    */
+    class MyObjective : public Objective_LM {
+    public:
+        MyObjective(int num_func, int num_var) : Objective_LM(num_func, num_var) {}
+
+        /**
+         *  Calculate the values of each function at x and return the function values as a vector in fvec.
+         *  @param  x           The current values of variables.
+         *  @param  fvec        Return the value vector of all the functions.
+         *  @return Return a negative value to terminate.
+         *
+         *  NOTE: This function implements f = (x0 - 1.0)^2 + (x1 - 1.0)^2. A client problem must implement
+         *      this function to evaluate the values of each function in the expression of x.
+         *  NOTE:
+         *  in our case, there are points.size() variables and functions
+         */
+        int evaluate(const Vector3D* x, Vector3D* fvec)
+        {
+            // x: residuals
+            //fvec[i] = x[i];
+            Vector3D base(3.0, 3.0, 3.0);
+            fvec[0] = x[0] - base;
+            return 0;
+        }
+    };
+
 }
 
 
@@ -876,6 +924,42 @@ bool Triangulation::triangulation(
     std::cout << "average difference for image 0 is: \n"; std::cout << avg_diff.first << '\n';
     std::cout << "average difference for image 1 is: \n"; std::cout << avg_diff.second << '\n';
     /* evaluate -------------------------------------------------------------------------------------*/
+
+
+
+    /*
+    * The basic implementations are above.
+    * The following is for optimization using the Levenberg-Marquardt method.
+    * The code is inspired by LiangLiang and Nail's tutotial -> Tutorial_NonlinearLeastSquares/main.cpp
+    */
+
+
+
+    /* ----------------------------------------------------------------------------------------------*/
+
+
+
+    
+    /*
+    * initialize the objective function
+    * 1st argument is the number of functions, 2nd the number of variables
+    */
+    GEO1016_A2::MyObjective obj(1, 1);
+
+    /* create an instance of the Levenberg - Marquardt(LM for short) optimizer */
+    Optimizer_LM lm;
+
+    /* initialized the variables.Later x will be modified after optimization. */
+    //std::vector<double> x = {4.0, -4.0, -4.0};
+
+    /* optimize(i.e., minimizing the objective function).*/
+    //bool status = lm.optimize(&obj, x);
+
+    /// retrieve the result.
+    //std::cout << "the solution is:     " << x[0] << ", " << x[1] << std::endl;
+    //std::cout << "the expected result: 0, 0" << std::endl;
+
+    //return status;
 
 
 

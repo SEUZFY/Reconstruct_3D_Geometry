@@ -32,9 +32,25 @@ using namespace easy3d;
 /// To use the Levenberg-Marquardt method to solve a non-linear least squares method, we need to define our own
 /// objective function that inherits 'Objective_LM'.
 
+// user-defined data
+struct Mydata {
+    double s = 2.0;
+    std::vector<double> base;
+    Mydata()
+    {
+        base.reserve(3);
+        base.emplace_back(1.0);
+        base.emplace_back(1.0);
+        base.emplace_back(1.0);
+    }
+};
+
 class MyObjective : public Objective_LM {
 public:
-    MyObjective(int num_func, int num_var) : Objective_LM(num_func, num_var) {}
+    MyObjective(int num_func, int num_var, Mydata* data_) : Objective_LM(num_func, num_var, data_) 
+    {
+        data = data_;
+    }
 
     /**
      *  Calculate the values of each function at x and return the function values as a vector in fvec.
@@ -46,30 +62,39 @@ public:
      *      this function to evaluate the values of each function in the expression of x.
      */
     int evaluate(const double *x, double *fvec) {
-        fvec[0] = x[0] - 1.0;
-        fvec[1] = x[1] - 1.0;
+        //fvec[0] = x[0] - 1.0;
+        //fvec[1] = x[1] - 1.0;
+        for (int i = 0; i < 3; ++i)
+            fvec[i] = x[i] - data->base[i];
         return 0;
     }
+protected:
+    Mydata* data;
 };
 
 
 int main(int argc, char **argv) {
     /// initialize the objective function
     /// 1st argument is the number of functions, 2nd the number of variables
-    MyObjective obj(2, 2);
+    /// the number of functions must > 1 ?
+    /// 
+    /// user-defined daya
+    Mydata data; std::cout << data.base.size();
+    MyObjective obj(3, 3, &data);
 
     /// create an instance of the Levenberg-Marquardt (LM for short) optimizer
     Optimizer_LM lm;
 
     /// initialized the variables. Later x will be modified after optimization.
-    std::vector<double> x = {4.0, -4.0}; // Let's guess the initial values to be (4.0, 4.0)
+    /// initial values will affect the results
+    std::vector<double> x = { 5.0, -16.0, 3.0};
 
     /// optimize (i.e., minimizing the objective function).
     bool status = lm.optimize(&obj, x);
 
     /// retrieve the result.
-    std::cout << "the solution is:     " << x[0] << ", " << x[1] << std::endl;
-    std::cout << "the expected result: 1, 1" << std::endl;
+    std::cout << "the solution is:     " << x[0] << ", " << x[1] << "," << x[2] << std::endl;
+    //std::cout << "the expected result: 0, 0" << std::endl;
 
     return status;
 }
