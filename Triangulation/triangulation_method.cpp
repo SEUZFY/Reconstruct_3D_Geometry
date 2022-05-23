@@ -765,7 +765,7 @@ namespace GEO1016_A2 {
     * store the re-projected 3d points' x and y coordinates 
     * in a double array - to be passed to the optimize function: lm.optimize(&obj, x);
     */
-    void setOptimizeVariables(double* x, int size, const std::vector<Vector3D>& points_3d)
+    void setOptimizeVariables(std::vector<double>& x, int size, const std::vector<Vector3D>& points_3d)
     {
         int i{}, k{};
         while (i < size && k < points_3d.size())
@@ -1038,7 +1038,8 @@ bool Triangulation::triangulation(
     Optimizer_LM lm;
 
     /* initialized the variables.Later x will be modified after optimization. */
-    double* x = new double[num_var];
+    //double* x = new double[num_var];
+    std::vector<double> x(num_var, 0);
     GEO1016_A2::setOptimizeVariables(x, num_var, points_3d);
 
 
@@ -1052,7 +1053,7 @@ bool Triangulation::triangulation(
 
     //return status;
 
-    delete[] x;
+    //delete[] x;
 
     /* return true if all steps are executed correctly ----------------------------------------------*/
     return true;
