@@ -842,7 +842,7 @@ namespace GEO1016_A2 {
          */
         int evaluate(const double* x, double* fvec)
         {
-            for (int i = 0; i < 3; ++i)
+            for (int i = 0; i < data->points_3d.size(); ++i)
                 fvec[i] = x[i] - data->points_3d[i].x();
             return 0;
         }
@@ -1004,7 +1004,7 @@ bool Triangulation::triangulation(
     * 1st argument is the number of functions, 2nd the number of variables
     */
     GEO1016_A2::MyData data(I, points_3d);
-    GEO1016_A2::MyObjective obj(3, 3, &data);
+    GEO1016_A2::MyObjective obj(points_3d.size(), points_3d.size(), &data);
 
     //int num_func = 2 * static_cast<int>(points_0.size());
     //int num_var  = 4 * static_cast<int>(points_3d.size());
@@ -1013,7 +1013,7 @@ bool Triangulation::triangulation(
     Optimizer_LM lm;
 
     /* initialized the variables.Later x will be modified after optimization. */
-    std::vector<double> x = { 1.01, 1.01, 1.01 };
+    std::vector<double> x(160, 1);
     //GEO1016_A2::setOptimizeVariables(x, 4, points_3d);  // add values to x
 
     /* optimize(i.e., minimizing the objective function).*/
