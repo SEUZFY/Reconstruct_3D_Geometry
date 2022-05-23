@@ -702,26 +702,12 @@ namespace GEO1016_A2 {
     * std::pair<double, double> - first is the variance of image_0, second is of image_1
     */
     std::pair<double, double> Evaluate(
-        const Matrix33& K,
-        const Matrix33& R,
-        const Vector3D& t,
+        const Matrix34& M,
+        const Matrix34& M_,
         const std::vector<Vector3D>& points_3d,
         const std::vector<Vector2D>& points_0,
         const std::vector<Vector2D>& points_1)
-    {
-        // useful helpers ----------------------------------------------------------------------------
-        // define identity matrix
-        Matrix33 I(
-            1, 0, 0,
-            0, 1, 0,
-            0, 0, 1
-        );
-        Vector3D zero_t(0.0, 0.0, 0.0);  // define 0 translation vector
-        Matrix34 M = getProjectionMatrix(K, I, zero_t);  // projection matrix for camera_0 (image_0)
-        Matrix34 M_ = getProjectionMatrix(K, R, t);  // projection matrix for camera_1 (image_1)
-        // useful helpers ----------------------------------------------------------------------------
-        
-
+    {        
         // Lambda - calculate the difference ---------------------------------------------------------
         auto getdiff = [&](
             const Matrix& M_projection,  // projection matrix
@@ -919,8 +905,21 @@ bool Triangulation::triangulation(
 
 
 
+    /* get projection matrices for image_0 and image_1 ----------------------------------------------*/
+    Matrix33 I(  /* identity matrix */
+        1, 0, 0,
+        0, 1, 0,
+        0, 0, 1
+    );
+    Vector3D zero_t(0.0, 0.0, 0.0);  /* define 0 translation vector */
+    Matrix34 M  = GEO1016_A2::getProjectionMatrix(K, I, zero_t);  /* projection matrix for camera_0(image_0) */
+    Matrix34 M_ = GEO1016_A2::getProjectionMatrix(K, R, t);  /* projection matrix for camera_1(image_1) */
+    /* get projection matrices for image_0 and image_1 ----------------------------------------------*/
+
+
+
     /* evaluate -------------------------------------------------------------------------------------*/
-    auto avg_diff = GEO1016_A2::Evaluate(K, R, t, points_3d, points_0, points_1);
+    auto avg_diff = GEO1016_A2::Evaluate(M, M_, points_3d, points_0, points_1);
     std::cout << "average difference for image 0 is: \n"; std::cout << avg_diff.first << '\n';
     std::cout << "average difference for image 1 is: \n"; std::cout << avg_diff.second << '\n';
     /* evaluate -------------------------------------------------------------------------------------*/
