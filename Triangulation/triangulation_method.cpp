@@ -850,10 +850,14 @@ namespace GEO1016_A2 {
                 double cal_y = M[1][0] * x[i] + M[1][1] * x[i + 1] + M[1][2] * x[i + 2];
                 double cal_z = M[2][0] * x[i] + M[2][1] * x[i + 1] + M[2][2] * x[i + 2];
                 double cal_w = x[i + 3];
+
+                double res_x = cal_x / cal_w;
+                double res_y = cal_y / cal_w;
+                double res_z = cal_z / cal_w;
                 
-                fvec[j]   = cal_x - data->points_3d[k].x();
-                fvec[j+1] = cal_y - data->points_3d[k].y();
-                fvec[j+2] = cal_z - data->points_3d[k].z();
+                fvec[j]   = res_x - data->points_3d[k].x();
+                fvec[j+1] = res_y - data->points_3d[k].y();
+                fvec[j+2] = res_z - data->points_3d[k].z();
                 fvec[j+3] = cal_w - 1.0;
 
                 i += 4;
