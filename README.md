@@ -66,6 +66,8 @@ Meanwhile some helpful information should be printed to the console.
 
 **Method**:
 
+After retrieving the 3D points, they can be re-projected back to image planes(image_0 and image_1 respectively), the following equation is used to evaluate the results:
+
 $\frac{\sum \sqrt{\left ( \Delta x \right )^2 + \left ( \Delta y \right )^2}}{N(points)}$
 
 $\Delta x$: obtained `x` coordinate $-$ original `x` coordinate
@@ -77,6 +79,20 @@ average difference for image 0 `(points_0)` is:
 
 average difference for image 1 `(points_1)` is:
 `0.912123`
+
+## Non-linear least-squares refinement
+
+After having the 3D points using linear-method, non-linear lease-squares refinement is used to optimize the results, specifically the `Levenberg-Marquardt` method.
+
+the average difference after refinement:
+
+average difference for image 0 is:
+`0.902694`
+
+average difference for image 1 is:
+`1.03088`
+
+Since only two images are used in this implementation, there is no big difference before/after the non-linear adjustment.
 
 ## NEED TO FINISH
 
