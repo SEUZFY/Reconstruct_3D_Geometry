@@ -101,7 +101,6 @@ Since only two images are used in this implementation, there is no big differenc
 ```
 
 ## NEED TO FINISH
+(1) Add timer to perform benchmark test.
 
-(1) Encapsulate the code related to non-linear optimization(tests done but code need to be organized)
-
-(2) special thanks both to LiangLiang and Nail (with name and email).
+(2) Special thanks both to LiangLiang and Nail (with name and email).
