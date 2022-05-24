@@ -1043,7 +1043,7 @@ bool Triangulation::triangulation(
 
     /* retrieve the result. */
 
-    std::cout << "the solution is: ";
+    std::cout << "the solution is: \n";
     int i = 0;
     for (const auto& co : x)
     {
