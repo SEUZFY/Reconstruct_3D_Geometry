@@ -849,13 +849,15 @@ namespace GEO1016_A2 {
                 double cal_x = M[0][0] * x[i] + M[0][1] * x[i + 1] + M[0][2] * x[i + 2];
                 double cal_y = M[1][0] * x[i] + M[1][1] * x[i + 1] + M[1][2] * x[i + 2];
                 double cal_z = M[2][0] * x[i] + M[2][1] * x[i + 1] + M[2][2] * x[i + 2];
+                double cal_w = x[i + 3];
                 
                 fvec[j]   = cal_x - data->points_3d[k].x();
                 fvec[j+1] = cal_y - data->points_3d[k].y();
                 fvec[j+2] = cal_z - data->points_3d[k].z();
+                fvec[j+3] = cal_w - 1.0;
 
-                i += 3;
-                j += 3;
+                i += 4;
+                j += 4;
                 k += 1;
             }
             return 0;
@@ -1018,8 +1020,8 @@ bool Triangulation::triangulation(
     * 1st argument is the number of functions, 2nd the number of variables
     */
     GEO1016_A2::MyData data(I, points_3d);
-    int num_func = static_cast<int>(points_3d.size()) * 3;
-    int num_var  = static_cast<int>(points_3d.size()) * 3;
+    int num_func = static_cast<int>(points_3d.size()) * 4;
+    int num_var  = static_cast<int>(points_3d.size()) * 4;
     GEO1016_A2::MyObjective obj(num_func, num_var, &data);
 
     //int num_func = 2 * static_cast<int>(points_0.size());
@@ -1041,10 +1043,11 @@ bool Triangulation::triangulation(
     int i = 0;
     for (const auto& co : x)
     {
-        if(i<3)
-            std::cout << co << " ";
+        //if(i<3)
+            //std::cout << co << " ";
+        std::cout << co << " ";
         ++i;
-        //if (i > 0 && i % 3 == 0)std::cout << '\n';
+        if (i > 0 && i % 4 == 0)std::cout << '\n';
     }
     //std::cout << "the expected result: 1, 1, 1" << std::endl;
 
