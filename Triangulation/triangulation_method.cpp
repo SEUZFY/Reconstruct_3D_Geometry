@@ -786,12 +786,14 @@ namespace GEO1016_A2 {
     * define Data struct to store the data we need to provide to the API
     */
     struct MyData {
-        Matrix33 M;
+        Matrix34 M;
         std::vector<Vector3D> points_3d;
-        MyData(const Matrix33& m, const std::vector<Vector3D>& points3D)
+        std::vector<Vector2D> points_2d;
+        MyData(const Matrix34& m, const std::vector<Vector3D>& points3D, const std::vector<Vector2D>& points2D)
         {
             points_3d = points3D;
             M = m;
+            points_2d = points2D;
         }
     };
 
@@ -843,25 +845,27 @@ namespace GEO1016_A2 {
         int evaluate(const double* x, double* fvec)
         {           
             int i = 0, j = 0, k = 0;
-            Matrix33 M = data->M;
+            Matrix34 M = data->M;
             while (k < data->points_3d.size())
-            {
-                double cal_x = M[0][0] * x[i] + M[0][1] * x[i + 1] + M[0][2] * x[i + 2];
-                double cal_y = M[1][0] * x[i] + M[1][1] * x[i + 1] + M[1][2] * x[i + 2];
-                double cal_z = M[2][0] * x[i] + M[2][1] * x[i + 1] + M[2][2] * x[i + 2];
-                double cal_w = x[i + 3];
-
-                double res_x = cal_x / cal_w;
-                double res_y = cal_y / cal_w;
-                double res_z = cal_z / cal_w;
+            {         
                 
-                fvec[j]   = res_x - data->points_3d[k].x();
-                fvec[j+1] = res_y - data->points_3d[k].y();
-                fvec[j+2] = res_z - data->points_3d[k].z();
-                fvec[j+3] = cal_w - 1.0;
+                double homo_x = M[0][0] * x[i] + M[0][1] * x[i + 1] + M[0][2] * x[i + 2] + M[0][3] * 1.0;
+                double homo_y = M[1][0] * x[i] + M[1][1] * x[i + 1] + M[1][2] * x[i + 2] + M[1][3] * 1.0;
+                double homo_w = M[2][0] * x[i] + M[2][1] * x[i + 1] + M[2][2] * x[i + 2] + M[2][3] * 1.0;
+                
+                //Vector3D v2d_homo(homo_x, homo_y, homo_w);
+                //Vector2D v2d = v2d
+                
+                double res_x = homo_x / homo_w;
+                double res_y = homo_y / homo_w;
+                double res_w = 1.0;
+                
+                fvec[j]   = res_x - data->points_2d[k].x();
+                fvec[j+1] = res_y - data->points_2d[k].y();
+                fvec[j+2] = res_w - 1.0;
 
-                i += 4;
-                j += 4;
+                i += 3;
+                j += 3;
                 k += 1;
             }
             return 0;
@@ -1023,9 +1027,9 @@ bool Triangulation::triangulation(
     * initialize the objective function
     * 1st argument is the number of functions, 2nd the number of variables
     */
-    GEO1016_A2::MyData data(I, points_3d);
-    int num_func = static_cast<int>(points_3d.size()) * 4;
-    int num_var  = static_cast<int>(points_3d.size()) * 4;
+    GEO1016_A2::MyData data(M, points_3d, points_0);
+    int num_func = static_cast<int>(points_3d.size()) * 3;
+    int num_var  = static_cast<int>(points_3d.size()) * 3;
     GEO1016_A2::MyObjective obj(num_func, num_var, &data);
 
     //int num_func = 2 * static_cast<int>(points_0.size());
@@ -1036,6 +1040,16 @@ bool Triangulation::triangulation(
 
     /* initialized the variables.Later x will be modified after optimization. */
     std::vector<double> x(num_var, 1);
+    int i = 0;
+    int k = 0;
+    while (k < x.size() && i<points_3d.size())
+    {
+        x[k] = points_3d[i].x();
+        x[k + 1] = points_3d[i].y();
+        x[k + 2] = points_3d[i].z();
+        k += 3;
+        i += 1;
+    }
     //GEO1016_A2::setOptimizeVariables(x, 4, points_3d);  // add values to x
 
     /* optimize(i.e., minimizing the objective function).*/
@@ -1044,16 +1058,35 @@ bool Triangulation::triangulation(
     /* retrieve the result. */
 
     std::cout << "the solution is: \n";
-    int i = 0;
+    i = 0;
     for (const auto& co : x)
     {
         //if(i<3)
             //std::cout << co << " ";
         std::cout << co << " ";
         ++i;
-        if (i > 0 && i % 4 == 0)std::cout << '\n';
+        if (i > 0 && i % 3 == 0)std::cout << '\n';
     }
     //std::cout << "the expected result: 1, 1, 1" << std::endl;
+
+
+    // updat points
+    i = 0;
+    k = 0;
+    while (k < x.size() && i<points_3d.size())
+    {
+        points_3d[i].x() = x[k];
+        points_3d[i].y() = x[k+1];
+        points_3d[i].z() = x[k+2];
+        k += 3;
+        i += 1;
+    }
+
+
+    /* re - evaluate */
+    avg_diff = GEO1016_A2::Evaluate(M, M_, points_3d, points_0, points_1);
+    std::cout << "average difference for image 0 is: \n"; std::cout << avg_diff.first << '\n';
+    std::cout << "average difference for image 1 is: \n"; std::cout << avg_diff.second << '\n';
 
     return status;
 
