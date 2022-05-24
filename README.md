@@ -78,3 +78,8 @@ average difference for image 0 `(points_0)` is:
 average difference for image 1 `(points_1)` is:
 `0.912123`
 
+## NEED TO FINISH
+
+(1) Encapsulate the code related to non-linear optimization(tests done but code need to be organized)
+
+(2) special thanks both to LiangLiang and Nail (with name and email).
