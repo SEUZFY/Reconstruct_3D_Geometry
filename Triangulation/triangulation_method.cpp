@@ -28,44 +28,12 @@
 
 
 
+/* turn on/off the Levenberg - Marquardt method */
+#define _LM_OPTIMIZE_
+
+
+
 using namespace easy3d;
-
-
-
-/* helpful for debugging, remove later -------------------------------------------------------------*/
-namespace debugger {
-    void PrintVector(const Vector& v)
-    {
-        for (std::size_t i = 0; i != v.size(); ++i)std::cout << v[i] << " ";
-        std::cout << '\n';
-    }
-
-    void PrintPoints(const std::vector<Vector2D>& points)
-    {
-        int count = 0;  // display the first 10 points
-        for (const auto& p : points)
-        {
-            std::cout << p.x() << "," << p.y() << '\n';
-            ++count;
-            if (count > 10)break;
-        }
-    }
-
-    void PrintMatrix(const Matrix& M)
-    {
-        auto Nrows = M.rows();
-        auto Ncols = M.cols();
-        for (auto i = 0; i != Nrows; ++i)
-        {
-            for (auto j = 0; j != Ncols; ++j)
-            {
-                std::cout << M(i, j) << ",";
-            }
-            std::cout << '\n';
-        }
-    }
-
-}
 
 
 
@@ -762,26 +730,6 @@ namespace GEO1016_A2 {
 
 
     /*
-    * store the re-projected 3d points' x and y coordinates 
-    * in a double array - to be passed to the optimize function: lm.optimize(&obj, x);
-    */
-    void setOptimizeVariables(std::vector<double>& x, int size, const std::vector<Vector3D>& points_3d)
-    {
-        int i{}, k{};
-        while (i < size && k < points_3d.size())
-        {
-            x[i]     = points_3d[k].x();
-            x[i + 1] = points_3d[k].y();
-            x[i + 2] = points_3d[k].z();
-            x[i + 3] = 1.0;
-
-            i += 4;
-            k += 1;
-        }
-    }
-
-
-    /*
     * To use the API we need to provide our own data via "data" pointer
     * define Data struct to store the data we need to provide to the API
     */
@@ -892,6 +840,64 @@ namespace GEO1016_A2 {
     protected:
         MyData* data;
     };
+
+    /*
+    * optimize
+    */
+    bool Optimize(
+        const Matrix34& M,
+        const Matrix34& M_,
+        std::vector<Vector3D>& points_3d,
+        const std::vector<Vector2D>& points_0,
+        const std::vector<Vector2D>& points_1)
+    {
+        /*
+        * initialize the objective function
+        * 1st argument is the number of functions, 2nd the number of variables
+        */
+        MyData data(M, M_, points_3d, points_0, points_1);
+        int num_func = static_cast<int>(points_3d.size()) * 6;
+        int num_var = static_cast<int>(points_3d.size()) * 3;
+        MyObjective obj(num_func, num_var, &data);
+
+        /* create an instance of the Levenberg - Marquardt(LM for short) optimizer */
+        Optimizer_LM lm;
+
+        /* initialized the variables.Later x will be modified after optimization. */
+        std::vector<double> x(num_var, 1);
+        int i = 0;
+        int k = 0;
+        while (k < x.size() && i < points_3d.size())
+        {
+            x[k] = points_3d[i].x();
+            x[k + 1] = points_3d[i].y();
+            x[k + 2] = points_3d[i].z();
+            k += 3;
+            i += 1;
+        }
+
+        /* optimize(i.e., minimizing the objective function).*/
+        bool status = lm.optimize(&obj, x);
+        if (status == false)
+        {
+            LOG(ERROR) << "optimize fail, please check\n";
+            return status;
+        }
+
+        /* updat points */
+        i = 0;
+        k = 0;
+        while (k < x.size() && i < points_3d.size())
+        {
+            points_3d[i].x() = x[k];
+            points_3d[i].y() = x[k + 1];
+            points_3d[i].z() = x[k + 2];
+            k += 3;
+            i += 1;
+        }
+        std::cout << "optimize done, 3d points updated!\n";
+        return status;
+    }
 
 }
 
@@ -1041,75 +1047,18 @@ bool Triangulation::triangulation(
 
 
 
-    
-    /*
-    * initialize the objective function
-    * 1st argument is the number of functions, 2nd the number of variables
-    */
-    GEO1016_A2::MyData data(M, M_, points_3d, points_0, points_1);
-    int num_func = static_cast<int>(points_3d.size()) * 6;
-    int num_var  = static_cast<int>(points_3d.size()) * 3;
-    GEO1016_A2::MyObjective obj(num_func, num_var, &data);
-
-    //int num_func = 2 * static_cast<int>(points_0.size());
-    //int num_var  = 4 * static_cast<int>(points_3d.size());
-
-    /* create an instance of the Levenberg - Marquardt(LM for short) optimizer */
-    Optimizer_LM lm;
-
-    /* initialized the variables.Later x will be modified after optimization. */
-    std::vector<double> x(num_var, 1);
-    int i = 0;
-    int k = 0;
-    while (k < x.size() && i<points_3d.size())
-    {
-        x[k] = points_3d[i].x();
-        x[k + 1] = points_3d[i].y();
-        x[k + 2] = points_3d[i].z();
-        k += 3;
-        i += 1;
-    }
-    //GEO1016_A2::setOptimizeVariables(x, 4, points_3d);  // add values to x
-
-    /* optimize(i.e., minimizing the objective function).*/
-    bool status = lm.optimize(&obj, x);
-
-    /* retrieve the result. */
-
-    //std::cout << "the solution is: \n";
-    //i = 0;
-    //for (const auto& co : x)
-    //{
-    //    //if(i<3)
-    //        //std::cout << co << " ";
-    //    std::cout << co << " ";
-    //    ++i;
-    //    if (i > 0 && i % 3 == 0)std::cout << '\n';
-    //}
-    //std::cout << "the expected result: 1, 1, 1" << std::endl;
-
-
-    // updat points
-    i = 0;
-    k = 0;
-    while (k < x.size() && i<points_3d.size())
-    {
-        points_3d[i].x() = x[k];
-        points_3d[i].y() = x[k+1];
-        points_3d[i].z() = x[k+2];
-        k += 3;
-        i += 1;
-    }
-
+#ifdef _LM_OPTIMIZE_
+    /* optimize */
+    bool status = GEO1016_A2::Optimize(M, M_, points_3d, points_0, points_1);
+    if (!status)LOG(ERROR) << "optimize fail, please check\n" << "the 3d points won't be updated\n";
 
     /* re - evaluate */
     avg_diff = GEO1016_A2::Evaluate(M, M_, points_3d, points_0, points_1);
     std::cout << "average difference for image 0 is: \n"; std::cout << avg_diff.first << '\n';
     std::cout << "average difference for image 1 is: \n"; std::cout << avg_diff.second << '\n';
+#endif // _LM_OPTIMIZE_
 
-    return status;
 
-    //delete[] x;
 
     /* return true if all steps are executed correctly ----------------------------------------------*/
     return true;
