@@ -98,7 +98,7 @@ protected:
 int main(int argc, char **argv) {
     /// initialize the objective function
     /// 1st argument is the number of functions, 2nd the number of variables
-    /// the number of functions must > 1 ?
+    /// the number of functions must >= the number of variables ?
     /// 
     /// user-defined daya
     Mydata data;

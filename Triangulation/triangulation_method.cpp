@@ -787,13 +787,22 @@ namespace GEO1016_A2 {
     */
     struct MyData {
         Matrix34 M;
+        Matrix34 M_;
         std::vector<Vector3D> points_3d;
-        std::vector<Vector2D> points_2d;
-        MyData(const Matrix34& m, const std::vector<Vector3D>& points3D, const std::vector<Vector2D>& points2D)
+        std::vector<Vector2D> points_0;
+        std::vector<Vector2D> points_1;
+        MyData(
+            const Matrix34& m, 
+            const Matrix34& m_,
+            const std::vector<Vector3D>& points3d, 
+            const std::vector<Vector2D>& points0,
+            const std::vector<Vector2D>& points1)
         {
-            points_3d = points3D;
-            M = m;
-            points_2d = points2D;
+            M  = m;
+            M_ = m_;
+            points_3d = points3d;
+            points_0 = points0;
+            points_1 = points1;
         }
     };
 
@@ -845,27 +854,37 @@ namespace GEO1016_A2 {
         int evaluate(const double* x, double* fvec)
         {           
             int i = 0, j = 0, k = 0;
-            Matrix34 M = data->M;
+            Matrix34 M  = data->M;
+            Matrix34 M_ = data->M_;
             while (k < data->points_3d.size())
             {         
                 
-                double homo_x = M[0][0] * x[i] + M[0][1] * x[i + 1] + M[0][2] * x[i + 2] + M[0][3] * 1.0;
-                double homo_y = M[1][0] * x[i] + M[1][1] * x[i + 1] + M[1][2] * x[i + 2] + M[1][3] * 1.0;
-                double homo_w = M[2][0] * x[i] + M[2][1] * x[i + 1] + M[2][2] * x[i + 2] + M[2][3] * 1.0;
+                double homo_x_0 = M[0][0] * x[i] + M[0][1] * x[i + 1] + M[0][2] * x[i + 2] + M[0][3] * 1.0;
+                double homo_y_0 = M[1][0] * x[i] + M[1][1] * x[i + 1] + M[1][2] * x[i + 2] + M[1][3] * 1.0;
+                double homo_w_0 = M[2][0] * x[i] + M[2][1] * x[i + 1] + M[2][2] * x[i + 2] + M[2][3] * 1.0;
+                              
+                double res_x_0 = homo_x_0 / homo_w_0;
+                double res_y_0 = homo_y_0 / homo_w_0;
+                double res_w_0 = 1.0;
+
+                double homo_x_1 = M_[0][0] * x[i] + M_[0][1] * x[i + 1] + M_[0][2] * x[i + 2] + M_[0][3] * 1.0;
+                double homo_y_1 = M_[1][0] * x[i] + M_[1][1] * x[i + 1] + M_[1][2] * x[i + 2] + M_[1][3] * 1.0;
+                double homo_w_1 = M_[2][0] * x[i] + M_[2][1] * x[i + 1] + M_[2][2] * x[i + 2] + M_[2][3] * 1.0;
+
+                double res_x_1 = homo_x_1 / homo_w_1;
+                double res_y_1 = homo_y_1 / homo_w_1;
+                double res_w_1 = 1.0;
                 
-                //Vector3D v2d_homo(homo_x, homo_y, homo_w);
-                //Vector2D v2d = v2d
-                
-                double res_x = homo_x / homo_w;
-                double res_y = homo_y / homo_w;
-                double res_w = 1.0;
-                
-                fvec[j]   = res_x - data->points_2d[k].x();
-                fvec[j+1] = res_y - data->points_2d[k].y();
-                fvec[j+2] = res_w - 1.0;
+                fvec[j]   = res_x_0 - data->points_0[k].x();
+                fvec[j+1] = res_y_0 - data->points_0[k].y();
+                fvec[j+2] = res_w_0 - 1.0;
+
+                fvec[j+3] = res_x_1 - data->points_1[k].x();
+                fvec[j+4] = res_y_1 - data->points_1[k].y();
+                fvec[j+5] = res_w_1 - 1.0;
 
                 i += 3;
-                j += 3;
+                j += 6;
                 k += 1;
             }
             return 0;
@@ -1027,8 +1046,8 @@ bool Triangulation::triangulation(
     * initialize the objective function
     * 1st argument is the number of functions, 2nd the number of variables
     */
-    GEO1016_A2::MyData data(M, points_3d, points_0);
-    int num_func = static_cast<int>(points_3d.size()) * 3;
+    GEO1016_A2::MyData data(M, M_, points_3d, points_0, points_1);
+    int num_func = static_cast<int>(points_3d.size()) * 6;
     int num_var  = static_cast<int>(points_3d.size()) * 3;
     GEO1016_A2::MyObjective obj(num_func, num_var, &data);
 
@@ -1057,16 +1076,16 @@ bool Triangulation::triangulation(
 
     /* retrieve the result. */
 
-    std::cout << "the solution is: \n";
-    i = 0;
-    for (const auto& co : x)
-    {
-        //if(i<3)
-            //std::cout << co << " ";
-        std::cout << co << " ";
-        ++i;
-        if (i > 0 && i % 3 == 0)std::cout << '\n';
-    }
+    //std::cout << "the solution is: \n";
+    //i = 0;
+    //for (const auto& co : x)
+    //{
+    //    //if(i<3)
+    //        //std::cout << co << " ";
+    //    std::cout << co << " ";
+    //    ++i;
+    //    if (i > 0 && i % 3 == 0)std::cout << '\n';
+    //}
     //std::cout << "the expected result: 1, 1, 1" << std::endl;
 
 
