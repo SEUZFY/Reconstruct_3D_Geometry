@@ -884,7 +884,7 @@ namespace GEO1016_A2 {
             return status;
         }
 
-        /* updat points */
+        /* update points */
         i = 0;
         k = 0;
         while (k < x.size() && i < points_3d.size())
