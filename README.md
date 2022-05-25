@@ -101,6 +101,8 @@ Since only two images are used in this implementation, there is no big differenc
 ```
 
 ## NEED TO FINISH
-(1) Add timer to perform benchmark test.
+(1) Add timer to perform benchmark test.(optional)
+
+(2) When submitting files and report, refer to the feedback of assignment 1.
 
 (2) Special thanks both to LiangLiang and Nail (with name and email).
