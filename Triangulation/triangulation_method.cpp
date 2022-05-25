@@ -842,7 +842,17 @@ namespace GEO1016_A2 {
     };
 
     /*
-    * optimize
+    * optimize function
+    * 
+    * @param:
+    * M  - projection matrix for image_0
+    * M_ - projection matrix for image_1
+    * points_3d - recovered 3d points using linear method
+    * points_0  - original 2d points for image_0
+    * points_1  - original 2d points for image_1
+    * 
+    * @return:
+    * bool - true if optimize success otherwise false
     */
     bool Optimize(
         const Matrix34& M,
@@ -1029,8 +1039,13 @@ bool Triangulation::triangulation(
 
     /* evaluate -------------------------------------------------------------------------------------*/
     auto avg_diff = GEO1016_A2::Evaluate(M, M_, points_3d, points_0, points_1);
-    std::cout << "average difference for image 0 is: \n"; std::cout << avg_diff.first << '\n';
-    std::cout << "average difference for image 1 is: \n"; std::cout << avg_diff.second << '\n';
+    std::cout << '\n';
+    std::cout << "statistics for linear method --------------------------------------------\n";
+    std::cout << "average difference for image 0 is: "<< avg_diff.first << '\n';
+    std::cout << "average difference for image 1 is: "<< avg_diff.second << '\n';
+    std::cout << "total average difference: " << (avg_diff.first + avg_diff.second) * 0.5 << '\n';
+    std::cout << "statistics for linear method --------------------------------------------\n";
+    std::cout << '\n';
     /* evaluate -------------------------------------------------------------------------------------*/
 
 
@@ -1048,14 +1063,21 @@ bool Triangulation::triangulation(
 
 
 #ifdef _LM_OPTIMIZE_
+    std::cout << "non-linear optimization enabled: \n";
+
     /* optimize */
     bool status = GEO1016_A2::Optimize(M, M_, points_3d, points_0, points_1);
     if (!status)LOG(ERROR) << "optimize fail, please check\n" << "the 3d points won't be updated\n";
 
     /* re - evaluate */
     avg_diff = GEO1016_A2::Evaluate(M, M_, points_3d, points_0, points_1);
-    std::cout << "average difference for image 0 is: \n"; std::cout << avg_diff.first << '\n';
-    std::cout << "average difference for image 1 is: \n"; std::cout << avg_diff.second << '\n';
+    std::cout << '\n';
+    std::cout << "statistics for non-linear method ----------------------------------------\n";
+    std::cout << "average difference for image 0 is: " << avg_diff.first << '\n';
+    std::cout << "average difference for image 1 is: " << avg_diff.second << '\n';
+    std::cout << "total average difference: " << (avg_diff.first + avg_diff.second) * 0.5 << '\n';
+    std::cout << "statistics for non-linear method ----------------------------------------\n";
+    std::cout << '\n';
 #endif // _LM_OPTIMIZE_
 
 
