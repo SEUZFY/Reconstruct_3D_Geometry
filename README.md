@@ -94,8 +94,15 @@ average difference for image 1 is:
 
 Since only two images are used in this implementation, there is no big difference before/after the non-linear adjustment.
 
+**Note**: the non-linear refinement can be time-consuming, if you want to turn it off you can comment the following `#define directive` in [triangulation_method.cpp](https://github.com/SEUZFY/Reconstruct_3D_Geometry/blob/master/Triangulation/triangulation_method.cpp) file (line 32):
+
+```cpp
+#define _LM_OPTIMIZE_
+```
+
 ## NEED TO FINISH
+(1) Add timer to perform benchmark test.(optional)
 
-(1) Encapsulate the code related to non-linear optimization(tests done but code need to be organized)
+(2) When submitting files and report, refer to the feedback of assignment 1.
 
-(2) special thanks both to LiangLiang and Nail (with name and email).
+(2) Special thanks both to LiangLiang and Nail (with name and email).
