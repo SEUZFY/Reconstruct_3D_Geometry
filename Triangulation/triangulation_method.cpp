@@ -770,30 +770,7 @@ namespace GEO1016_A2 {
          *  @param  x           The current values of variables.
          *  @param  fvec        Return the value vector of all the functions.
          *  @return Return a negative value to terminate.
-         *
-         *  NOTE:
-         *  the objective is: Min SUM || MPi - pi ||^2
-         *  || MPi - pi || is the length of the residual vector: MPi - pi = r
-         *  then || MPi - pi || = || r || = sqrt(r.x * r.x + r.y * r.y)
-         *  
-         *  thus, the objective is then turned into:
-         *  Min SUM || r ||^2 = Min SUM (x^2 + y^2) = Min SUM (x0^2 + x1^2)
-         *  
-         * because we CAN NOT change the type of x parameter
-         * we store the re-projected 3d points¡¯coordinates all in x:
-         * thus x should contain 2 * points.size() elements
-         * store each x, y coordinate for each point.
          * 
-         * e.g.:
-         * x[0], x[1] - indicating the first  point's x and y coordinate
-         * x[2], x[3] - indicating the second point's x and y coordinate
-         * ...
-         * thus we should have points.size() * 2 variables (in our case 2 * 160 = 320 variables)
-         * and  we should have points.size() * 2 functions, since for each point we need two objective functions.
-         * therefore the objective would be:
-         * MyObjective obj(160, 320, &data);  -> in our case
-         * 
-         * GOOD TO KNOW
          * the optimize functions do the squared residuals internally
          * so we only need to define the residuals in the evaluation() function body like so:
          * fvec[i] = x[i] - original_x
