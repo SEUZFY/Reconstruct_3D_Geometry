@@ -104,11 +104,11 @@ Since only two images are used in this implementation, there is no big differenc
 
 **Yitong**:
 xiayitong0630@gmail.com
--> Her [GitHub](https://github.com/YitongXia/camera-calibration)
+-> Her [GitHub](https://github.com/YitongXia/3D-geometry-reconstruction)
 
 **Leo Kan**:
 leo.kan01@gmail.com
--> His [GitHub](https://github.com/leowhk/A1_calibration).
+-> His [GitHub](https://github.com/leowhk/A2_triangulation).
 
 ## SPECIAL THANKS
 Special thanks go to [LiangLiang](https://3d.bk.tudelft.nl/liangliang/), his kindly given code framework(easy3D) is the basis of this work, without which the implementations are impossible to carry out.
