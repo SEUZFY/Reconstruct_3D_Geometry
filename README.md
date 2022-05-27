@@ -100,9 +100,17 @@ Since only two images are used in this implementation, there is no big differenc
 #define _LM_OPTIMIZE_
 ```
 
-## NEED TO FINISH
-(1) Add timer to perform benchmark test.(optional)
+## COLLABORATORS
 
-(2) When submitting files and report, refer to the feedback of assignment 1.
+**Yitong**:
+xiayitong0630@gmail.com
+-> Her [GitHub](https://github.com/YitongXia/camera-calibration)
 
-(2) Special thanks both to LiangLiang and Nail (with name and email).
+**Leo Kan**:
+leo.kan01@gmail.com
+-> His [GitHub](https://github.com/leowhk/A1_calibration).
+
+## SPECIAL THANKS
+Special thanks go to [LiangLiang](https://3d.bk.tudelft.nl/liangliang/), his kindly given code framework(easy3D) is the basis of this work, without which the implementations are impossible to carry out.
+
+Special thanks go to [Nail Ibrahimli](https://3d.bk.tudelft.nl/nibrahimli/), his patience and guidance on nonlinear optimization are very important, without which the non-linear method can't be correctly delivered.
