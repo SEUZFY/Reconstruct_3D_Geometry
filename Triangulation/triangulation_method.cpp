@@ -1070,14 +1070,31 @@ bool Triangulation::triangulation(
     if (!status)LOG(ERROR) << "optimize fail, please check\n" << "the 3d points won't be updated\n";
 
     /* re - evaluate */
-    avg_diff = GEO1016_A2::Evaluate(M, M_, points_3d, points_0, points_1);
+    auto avg_diff_after = GEO1016_A2::Evaluate(M, M_, points_3d, points_0, points_1);
     std::cout << '\n';
     std::cout << "statistics for non-linear method ----------------------------------------\n";
-    std::cout << "average difference for image 0 is: " << avg_diff.first << '\n';
-    std::cout << "average difference for image 1 is: " << avg_diff.second << '\n';
-    std::cout << "total average difference: " << (avg_diff.first + avg_diff.second) * 0.5 << '\n';
+    std::cout << "average difference for image 0 is: " << avg_diff_after.first << '\n';
+    std::cout << "average difference for image 1 is: " << avg_diff_after.second << '\n';
+    std::cout << "total average difference: " << (avg_diff_after.first + avg_diff_after.second) * 0.5 << '\n';
     std::cout << "statistics for non-linear method ----------------------------------------\n";
     std::cout << '\n';
+
+    /* comparison */
+    std::cout << "comparison --------------------------------------------------------------\n";
+    double avg_diff_1 = (avg_diff.first + avg_diff.second) * 0.5;
+    double avg_diff_2 = (avg_diff_after.first + avg_diff_after.second) * 0.5;
+    bool is_optimized = avg_diff_2 < avg_diff_1 ? true : false;
+    if (is_optimized) {
+        if (abs(avg_diff_1) < 1e-8) {
+            std::cout << "linear method performs really well\n";
+        }
+        else {
+            double preportion = (avg_diff_1 - avg_diff_2) / avg_diff_1;
+            std::cout << "after non-linear optimization, accuracy improved by " <<
+                preportion * 100 << "%\n";
+        } 
+    }
+    std::cout << "comparison --------------------------------------------------------------\n";
 #endif // _LM_OPTIMIZE_
 
 
