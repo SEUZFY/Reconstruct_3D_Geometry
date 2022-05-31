@@ -572,7 +572,7 @@ namespace GEO1016_A2 {
             Result& res, std::pair<std::size_t, std::size_t>(&count)[4])
         {
             R = rt.possibleR[p_r]; t = rt.possiblet[p_t];
-            if ((determinant(R) - 1.0) < 1e-8)  // determinant(R) = 1.0 (within a tiny threshold)
+            if ((abs(determinant(R))- 1.0) < 1e-8)  // determinant(R) = 1.0 (within a tiny threshold)
             {
                 M_ = getProjectionMatrix(K, R, t);
 
